@@ -1,0 +1,89 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LocalBhai - Apka Seher Ka Bhai</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-XxkaM2tm1s34v6eHu6tYB5DHUxV9JYlRZUXYPGJXAvjhTNz+WBD6/Qkd0VrGxkKpWInxqJHLpV8coKXj5Bnbaw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header id="navbar">
+    <div class="nav-container">
+      <div class="logo">LocalBhai</div>
+      <nav>
+        <ul>
+          <li><a href="#hero">Home</a></li>
+          <li><a href="#food">Food</a></li>
+          <li><a href="#kirana">Kirana</a></li>
+          <li><a href="#vet">Vet</a></li>
+          <li><a href="#services">Services</a></li>
+        </ul>
+      </nav>
+      <div class="search">
+        <input type="text" id="searchInput" placeholder="Search vendors, items, services...">
+        <i class="fa fa-search"></i>
+      </div>
+    </div>
+  </header>
+  <main>
+    <section id="hero" class="hero section-visible">
+      <div class="hero-content">
+        <h1>LocalBhai</h1>
+        <p>Apka Seher Ka Bhai</p>
+      </div>
+    </section>
+    <section id="food" class="section">
+      <h2>Food Delivery</h2>
+      <div id="foodList" class="card-grid"></div>
+    </section>
+    <section id="kirana" class="section">
+      <h2>Kirana & Essentials</h2>
+      <div id="kiranaList" class="card-grid"></div>
+    </section>
+    <section id="vet" class="section">
+      <h2>Vet Services</h2>
+      <div class="vet-container">
+        <div class="vet-col">
+          <h3>Providers</h3>
+          <div id="vetProviders" class="card-grid"></div>
+        </div>
+        <div class="vet-col">
+          <h3>Requests</h3>
+          <div id="vetSeekers" class="card-grid"></div>
+        </div>
+      </div>
+    </section>
+    <section id="services" class="section">
+      <h2>General Service Providers</h2>
+      <div id="serviceList" class="card-grid"></div>
+    </section>
+  </main>
+  <footer>
+    <p>Made with <span class="heart">❤️</span> in Odisha by LocalBhai</p>
+  </footer>
+
+  <!-- Confirmation Modal -->
+  <div id="confirmModal" class="modal">
+    <div class="modal-content">
+      <span id="confirmClose" class="close">&times;</span>
+      <p id="confirmMessage"></p>
+    </div>
+  </div>
+
+  <!-- Detail Modal -->
+  <div id="detailModal" class="modal">
+    <div class="modal-content">
+      <span id="detailClose" class="close">&times;</span>
+      <div id="detailBody"></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
