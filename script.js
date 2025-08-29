@@ -1,32 +1,57 @@
 // script.js
 'use strict';
 
-// Dummy data arrays provided
+/* =========================
+   Dummy Data (Dynamic Cards)
+   ========================= */
+
+// 🍲 Food Delivery Vendors
 const foodVendors = [
   { name: "Odia Zaika", cuisine: "Odia Thali", rating: 4.5, time: "30 min" },
   { name: "Chhapan Bhog", cuisine: "Sweets & Snacks", rating: 4.3, time: "20 min" },
-  { name: "Biryani Junction", cuisine: "Biryani & Rolls", rating: 4.6, time: "35 min" }
+  { name: "Biryani Junction", cuisine: "Biryani & Rolls", rating: 4.6, time: "35 min" },
+  { name: "Tandoor Tales", cuisine: "North Indian", rating: 4.2, time: "32 min" },
+  { name: "Masala Box", cuisine: "South Indian", rating: 4.4, time: "25 min" }
 ];
 
+// 🛒 Kirana Items
 const kiranaItems = [
   { name: "Fortune Atta", price: "₹250 / 10kg" },
   { name: "Amul Milk 1L", price: "₹55" },
   { name: "Basmati Rice 5kg", price: "₹499" },
-  { name: "Arhar Dal 1kg", price: "₹130" }
+  { name: "Arhar Dal 1kg", price: "₹130" },
+  { name: "Sunflower Oil 1L", price: "₹145" },
+  { name: "Wheat 10kg", price: "₹320" }
 ];
 
+// 🐄 Vet Services - Providers
 const vetProviders = [
-  { name: "Dr. Priya Sahu", specialty: "Livestock Vet", location: "Cuttack" },
-  { name: "Dr. Ramesh Nayak", specialty: "Pet Specialist", location: "Bhubaneswar" },
-  { name: "Dr. Anjali Das", specialty: "Poultry Expert", location: "Puri" }
+  { name: "Dr. Priya Sahu", specialty: "Livestock Vet", location: "Cuttack", fee: "₹300" },
+  { name: "Dr. Ramesh Nayak", specialty: "Pet Specialist", location: "Bhubaneswar", fee: "₹400" },
+  { name: "Dr. Anjali Das", specialty: "Poultry Expert", location: "Puri", fee: "₹350" }
 ];
 
+// 🐕 Vet Services - Seekers (dummy requests)
 const vetSeekers = [
   { animal: "Cow", service: "Vaccination", location: "Khordha" },
   { animal: "Dog", service: "Skin Treatment", location: "Cuttack" },
   { animal: "Goat", service: "Checkup", location: "Khordha" }
 ];
 
+// 🌾 Farmers & Agri
+const agriServices = [
+  { name: "Krishi Seva Kendra", type: "Seeds & Fertilizers", location: "Khurda" },
+  { name: "AgriLab Odisha", type: "Soil Testing", location: "Bhubaneswar" },
+  { name: "GreenPump", type: "Irrigation Repair", location: "Cuttack" }
+];
+
+const farmerRequests = [
+  { crop: "Paddy", need: "Pest Diagnosis", location: "Nimapara" },
+  { crop: "Vegetables", need: "Drip Setup", location: "Pipili" },
+  { crop: "Groundnut", need: "Soil Test", location: "Khordha" }
+];
+
+// 🛠️ General Service Providers
 const serviceProviders = [
   { name: "Sanjay Electric Works", type: "Electrician", location: "Nirakarpur" },
   { name: "Manoj Plumber Services", type: "Plumber", location: "Nirakarpur" },
@@ -34,204 +59,327 @@ const serviceProviders = [
   { name: "Tailor Babu", type: "Tailor", location: "Nirakarpur" }
 ];
 
-// Simple cart to collect kirana items added via the Add to Cart button.
-// This is a basic simulation that stores item names in an array. In a
-// production system this would integrate with a backend or local
-// storage. Users are notified when items are added.
+/* =========================
+   Helpers
+   ========================= */
+
 const cart = [];
 
-// Helper to create card element
-function createCardHTML(title, lines, buttonText) {
-  // Builds a standard card with a single action button. When
-  // multiple actions are required (e.g. Add to Cart and Order Now
-  // for kirana items), a specialised rendering function will
-  // construct the button group separately. The helper assembles
-  // the heading, descriptive lines and a single button.
-  let inner = `<h4>${title}</h4>`;
-  lines.forEach(line => {
-    inner += `<p>${line}</p>`;
-  });
-  // Append button only if text provided
-  if (buttonText) {
-    inner += `<button>${buttonText}</button>`;
+function el(tag, className, html){
+  const e = document.createElement(tag);
+  if(className) e.className = className;
+  if(html !== undefined) e.innerHTML = html;
+  return e;
+}
+
+function createCard({ title, lines = [], meta = [], actions = [] }){
+  const card = el('div', 'card');
+  const h = el('h4', null, title);
+  card.appendChild(h);
+  if(meta.length){
+    const metaRow = el('div','meta');
+    meta.forEach(m => metaRow.appendChild(el('span','badge', m)));
+    card.appendChild(metaRow);
   }
-  const div = document.createElement('div');
-  div.className = 'card';
-  div.innerHTML = inner;
-  return div;
-}
-
-function renderFood() {
-  const container = document.getElementById('foodList');
-  foodVendors.forEach(vendor => {
-    const card = createCardHTML(
-      vendor.name,
-      [vendor.cuisine, `⭐ ${vendor.rating}`, vendor.time],
-      'Order Now'
-    );
-    card.dataset.search = (vendor.name + ' ' + vendor.cuisine).toLowerCase();
-    card.querySelector('button').addEventListener('click', () => handleOrder(vendor.name));
-    container.appendChild(card);
-  });
-}
-
-function renderKirana() {
-  const container = document.getElementById('kiranaList');
-  kiranaItems.forEach(item => {
-    // Create a base card without button since we'll add a button group
-    const card = createCardHTML(
-      item.name,
-      [item.price],
-      ''
-    );
-    card.dataset.search = item.name.toLowerCase();
-    // Build a button group with Add to Cart and Order Now
-    const btnGroup = document.createElement('div');
-    btnGroup.className = 'card-buttons';
-    // Add to Cart button
-    const addBtn = document.createElement('button');
-    addBtn.textContent = 'Add to Cart';
-    addBtn.addEventListener('click', () => {
-      addToCart(item.name);
+  lines.forEach(t => card.appendChild(el('p', null, t)));
+  if(actions.length){
+    const row = el('div','actions');
+    actions.forEach(a => {
+      const b = el('button','btn');
+      b.classList.add(a.variant || 'btn-primary');
+      b.innerHTML = a.icon ? `<i class="${a.icon}"></i> ${a.label}` : a.label;
+      b.addEventListener('click', a.onClick);
+      row.appendChild(b);
     });
-    // Order Now button
-    const orderBtn = document.createElement('button');
-    orderBtn.textContent = 'Order Now';
-    orderBtn.addEventListener('click', () => handleOrder(item.name));
-    btnGroup.appendChild(addBtn);
-    btnGroup.appendChild(orderBtn);
-    card.appendChild(btnGroup);
-    container.appendChild(card);
-  });
+    card.appendChild(row);
+  }
+  return card;
 }
 
-function renderVets() {
-  const providerContainer = document.getElementById('vetProviders');
-  vetProviders.forEach(provider => {
-    // Vet providers: we still use the standard card with a Book Now button
-    const card = createCardHTML(
-      provider.name,
-      [provider.specialty, provider.location],
-      'Book Now'
-    );
-    card.dataset.search = (provider.name + ' ' + provider.specialty + ' ' + provider.location).toLowerCase();
-    card.querySelector('button').addEventListener('click', () => handleOrder(provider.name));
-    providerContainer.appendChild(card);
-  });
-  const seekerContainer = document.getElementById('vetSeekers');
-  vetSeekers.forEach(req => {
-    // For service seekers we remove the explicit Details button and
-    // instead make the entire card clickable. Clicking a card opens
-    // a modal with more information about the request.
-    const card = createCardHTML(
-      req.animal,
-      [`Service: ${req.service}`, `Location: ${req.location}`],
-      ''
-    );
-    card.dataset.search = (req.animal + ' ' + req.service + ' ' + req.location).toLowerCase();
-    card.style.cursor = 'pointer';
-    card.addEventListener('click', () => showDetails(req));
-    seekerContainer.appendChild(card);
-  });
+function showConfirm(message){
+  document.getElementById('confirmMessage').textContent = message;
+  document.getElementById('confirmModal').style.display = 'flex';
 }
-
-function renderServices() {
-  const container = document.getElementById('serviceList');
-  serviceProviders.forEach(sp => {
-    const card = createCardHTML(
-      sp.name,
-      [sp.type, sp.location],
-      'Book Now'
-    );
-    card.dataset.search = (sp.name + ' ' + sp.type + ' ' + sp.location).toLowerCase();
-    card.querySelector('button').addEventListener('click', () => handleOrder(sp.name));
-    container.appendChild(card);
-  });
-}
-
-// Add to cart logic: push item name into the cart array and show a
-// confirmation message to the user. We reuse the confirmation modal
-// for consistency. In a more advanced implementation the cart would
-// show a count in the header or open a mini-cart.
-function addToCart(name) {
-  cart.push(name);
-  showConfirmModal(`${name} added to cart!`);
-}
-
-// Modal handling
-function showConfirmModal(message) {
-  const modal = document.getElementById('confirmModal');
-  const msgEl = document.getElementById('confirmMessage');
-  msgEl.textContent = message;
-  modal.style.display = 'flex';
-}
-
-function hideConfirmModal() {
+function hideConfirm(){
   document.getElementById('confirmModal').style.display = 'none';
 }
-
-function showDetails(req) {
-  const modal = document.getElementById('detailModal');
-  const body = document.getElementById('detailBody');
-  body.innerHTML = `<h4>${req.animal}</h4><p>Service Needed: ${req.service}</p><p>Location: ${req.location}</p>`;
-  modal.style.display = 'flex';
+function showDetails(html){
+  document.getElementById('detailBody').innerHTML = html;
+  document.getElementById('detailModal').style.display = 'flex';
 }
-
-function hideDetails() {
+function hideDetails(){
   document.getElementById('detailModal').style.display = 'none';
 }
 
-function handleOrder(name) {
-  showConfirmModal(`Order Confirmed! ${name} notified. Delivery on the way 🚴`);
-  // simulate vendor and delivery notifications
-  setTimeout(() => alert(`Vendor accepted the ${name} request!`), 2000);
-  setTimeout(() => alert(`Delivery agent picked up your ${name}. Approaching soon 🚴`), 4000);
+function simulateFlow(name){
+  showConfirm(`Order Confirmed! ${name} notified. Delivery on the way 🚴`);
+  setTimeout(()=>alert(`Vendor accepted the ${name} request!`), 1500);
+  setTimeout(()=>alert(`Delivery agent picked up your ${name}. Approaching soon 🚴`), 3500);
 }
 
-// Search filter
-function initSearch() {
-  const input = document.getElementById('searchInput');
-  input.addEventListener('input', () => {
-    const query = input.value.trim().toLowerCase();
-    document.querySelectorAll('.card').forEach(card => {
-      const searchText = card.dataset.search || '';
-      if (searchText.includes(query)) {
-        card.style.display = '';
-      } else {
-        card.style.display = 'none';
-      }
+/* =========================
+   Renderers
+   ========================= */
+
+function renderFood(){
+  const wrap = document.getElementById('foodList');
+  foodVendors.forEach(v=>{
+    const c = createCard({
+      title: v.name,
+      meta: [`⭐ ${v.rating}`, v.time],
+      lines: [v.cuisine],
+      actions: [{
+        label:'Order Now', icon:'fa fa-motorcycle', onClick:()=>simulateFlow(v.name)
+      }]
+    });
+    c.dataset.search = `${v.name} ${v.cuisine}`.toLowerCase();
+    wrap.appendChild(c);
+  });
+}
+
+function renderKirana(){
+  const wrap = document.getElementById('kiranaList');
+  kiranaItems.forEach(it=>{
+    const c = createCard({
+      title: it.name,
+      lines: [it.price],
+      actions: [
+        { label:'Add to Cart', icon:'fa fa-cart-plus', variant:'btn-ghost', onClick:()=>{
+            cart.push(it.name);
+            showConfirm(`${it.name} added to cart!`);
+          }},
+        { label:'Order Now', icon:'fa fa-bolt', onClick:()=>simulateFlow(it.name) }
+      ]
+    });
+    c.dataset.search = `${it.name} ${it.price}`.toLowerCase();
+    wrap.appendChild(c);
+  });
+}
+
+function renderVets(){
+  const provWrap = document.getElementById('vetProviders');
+  vetProviders.forEach(v=>{
+    const c = createCard({
+      title: v.name,
+      lines: [`${v.specialty} • ${v.location}`, `Consultation Fee: ${v.fee}`],
+      actions: [{ label:'Book Now', icon:'fa fa-calendar-check', onClick:()=>simulateFlow(v.name) }]
+    });
+    c.dataset.search = `${v.name} ${v.specialty} ${v.location}`.toLowerCase();
+    provWrap.appendChild(c);
+  });
+
+  const seekWrap = document.getElementById('vetSeekers');
+  vetSeekers.forEach(r=>{
+    const c = createCard({
+      title: r.animal,
+      lines: [`Service: ${r.service}`, `Location: ${r.location}`],
+      actions: [{ label:'View Details', icon:'fa fa-eye', variant:'btn-ghost', onClick:()=>{
+        showDetails(`
+          <h3>${r.animal}</h3>
+          <p><strong>Service Needed:</strong> ${r.service}</p>
+          <p><strong>Location:</strong> ${r.location}</p>
+          <button class="btn btn-primary" id="detailBook">Notify Vet</button>
+        `);
+        setTimeout(()=>{
+          const btn = document.getElementById('detailBook');
+          if(btn) btn.onclick = ()=>{ hideDetails(); simulateFlow(`${r.animal} ${r.service}`); };
+        },0);
+      }}]
+    });
+    c.dataset.search = `${r.animal} ${r.service} ${r.location}`.toLowerCase();
+    seekWrap.appendChild(c);
+  });
+}
+
+function renderFarmers(){
+  const agriWrap = document.getElementById('agriServices');
+  agriServices.forEach(a=>{
+    const c = createCard({
+      title: a.name,
+      lines: [`${a.type} • ${a.location}`],
+      actions: [{ label:'Contact Now', icon:'fa fa-phone', onClick:()=>simulateFlow(a.name) }]
+    });
+    c.dataset.search = `${a.name} ${a.type} ${a.location}`.toLowerCase();
+    agriWrap.appendChild(c);
+  });
+
+  const reqWrap = document.getElementById('farmerRequests');
+  farmerRequests.forEach(fr=>{
+    const c = createCard({
+      title: fr.crop,
+      lines: [`Need: ${fr.need}`, `Location: ${fr.location}`],
+      actions: [{ label:'View Details', icon:'fa fa-eye', variant:'btn-ghost', onClick:()=>{
+        showDetails(`
+          <h3>${fr.crop}</h3>
+          <p><strong>Need:</strong> ${fr.need}</p>
+          <p><strong>Location:</strong> ${fr.location}</p>
+          <button class="btn btn-primary" id="frHelp">Offer Help</button>
+        `);
+        setTimeout(()=>{
+          const btn = document.getElementById('frHelp');
+          if(btn) btn.onclick = ()=>{ hideDetails(); simulateFlow(`${fr.crop} ${fr.need}`); };
+        },0);
+      }}]
+    });
+    c.dataset.search = `${fr.crop} ${fr.need} ${fr.location}`.toLowerCase();
+    reqWrap.appendChild(c);
+  });
+}
+
+function renderServices(){
+  const wrap = document.getElementById('serviceList');
+  serviceProviders.forEach(s=>{
+    const c = createCard({
+      title: s.name,
+      lines: [`${s.type} • ${s.location}`],
+      actions: [{ label:'Book Now', icon:'fa fa-wrench', onClick:()=>simulateFlow(s.name) }]
+    });
+    c.dataset.search = `${s.name} ${s.type} ${s.location}`.toLowerCase();
+    wrap.appendChild(c);
+  });
+}
+
+/* =========================
+   Search + Reveal + Events
+   ========================= */
+
+function initSearch(){
+  const input = document.getElementById('globalSearch');
+  input.addEventListener('input', ()=>{
+    const q = input.value.trim().toLowerCase();
+    document.querySelectorAll('.grid .card').forEach(card=>{
+      const text = (card.dataset.search||'').toLowerCase();
+      card.style.display = text.includes(q) ? '' : 'none';
     });
   });
 }
 
-// Intersection Observer for fade-in
-function initIntersection() {
-  const sections = document.querySelectorAll('.section');
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('section-visible');
-        observer.unobserve(entry.target);
+function initReveal(){
+  const obs = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        e.target.classList.add('section-visible');
+        obs.unobserve(e.target);
       }
     });
-  }, { threshold: 0.2 });
-  sections.forEach(sec => observer.observe(sec));
+  }, { threshold: .2 });
+  document.querySelectorAll('.section').forEach(sec => obs.observe(sec));
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+function initModals(){
+  document.getElementById('confirmClose').onclick = hideConfirm;
+  document.getElementById('confirmOk').onclick = hideConfirm;
+  document.getElementById('detailClose').onclick = hideDetails;
+  window.addEventListener('click', (e)=>{
+    if(e.target === document.getElementById('confirmModal')) hideConfirm();
+    if(e.target === document.getElementById('detailModal')) hideDetails();
+  });
+}
+
+/* =========================
+   Init
+   ========================= */
+/* ---- debounce for search (saves CPU on phones) ---- */
+function debounce(fn, delay=200){
+  let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args), delay); };
+}
+function initSearch(){
+  const input = document.getElementById('globalSearch');
+  const run = ()=> {
+    const q = input.value.trim().toLowerCase();
+    document.querySelectorAll('.grid .card').forEach(card=>{
+      const text = (card.dataset.search||'').toLowerCase();
+      card.style.display = text.includes(q) ? '' : 'none';
+    });
+  };
+  input.addEventListener('input', debounce(run, 120));
+}
+
+/* ---- modal a11y: ESC to close, focus trap, restore focus ---- */
+let lastFocus = null;
+function trapFocus(modal){
+  const focusables = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+  if(!focusables.length) return ()=>{};
+  const first = focusables[0], last = focusables[focusables.length-1];
+  function handler(e){
+    if(e.key === 'Tab'){
+      if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+      else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+    }
+    if(e.key === 'Escape'){ closeAnyModal(); }
+  }
+  modal.addEventListener('keydown', handler);
+  return ()=> modal.removeEventListener('keydown', handler);
+}
+let untrap = ()=>{};
+function openModal(el){
+  lastFocus = document.activeElement;
+  document.body.classList.add('modal-open');
+  el.style.display = 'flex';
+  untrap = trapFocus(el);
+  (el.querySelector('[autofocus]') || el.querySelector('button') || el).focus();
+}
+function closeModal(el){
+  el.style.display = 'none';
+  document.body.classList.remove('modal-open');
+  untrap(); untrap = ()=>{};
+  if(lastFocus) lastFocus.focus();
+}
+function closeAnyModal(){
+  ['confirmModal','detailModal'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el && el.style.display === 'flex') closeModal(el);
+  });
+}
+
+/* swap in these implementations in your show/hide calls */
+function showConfirm(message){
+  document.getElementById('confirmMessage').textContent = message;
+  openModal(document.getElementById('confirmModal'));
+}
+function hideConfirm(){ closeModal(document.getElementById('confirmModal')); }
+function showDetails(html){
+  const m = document.getElementById('detailModal');
+  const body = document.getElementById('detailBody');
+  body.innerHTML = html;
+  // give the dialog a title for aria-labelledby
+  body.insertAdjacentHTML('afterbegin','<h3 id="detailTitle" tabindex="-1" autofocus></h3>');
+  openModal(m);
+}
+function hideDetails(){ closeModal(document.getElementById('detailModal')); }
+
+/* ESC close & outside click (already had outside; add ESC global) */
+window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeAnyModal(); });
+
+/* ---- cart badge hook (uses your .cart-count class) ---- */
+function updateCartCount(){
+  let badge = document.querySelector('.cart-count');
+  if(!badge){
+    const wrap = document.querySelector('.search-wrap') || document.querySelector('.brand');
+    if(!wrap) return;
+    const b = document.createElement('span'); b.className='cart-count'; wrap.style.position='relative'; wrap.appendChild(b);
+    badge = b;
+  }
+  badge.textContent = String(cart.length);
+  badge.style.display = cart.length ? 'flex' : 'none';
+}
+// call after addToCart
+function addToCart(name){
+  cart.push(name);
+  updateCartCount();
+  showConfirm(`${name} added to cart!`);
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
   renderFood();
   renderKirana();
   renderVets();
+  renderFarmers();
   renderServices();
   initSearch();
-  initIntersection();
-  // modal close buttons
-  document.getElementById('confirmClose').onclick = hideConfirmModal;
-  document.getElementById('detailClose').onclick = hideDetails;
-  // close when clicking outside modal
-  window.onclick = (e) => {
-    if (e.target === document.getElementById('confirmModal')) hideConfirmModal();
-    if (e.target === document.getElementById('detailModal')) hideDetails();
-  };
+  initReveal();
+  initModals();
 });
+
+
 
