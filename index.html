@@ -2,88 +2,281 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>LocalBhai - Apka Seher Ka Bhai</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <title>LocalBhai — Apka Seher Ka Bhai</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-XxkaM2tm1s34v6eHu6tYB5DHUxV9JYlRZUXYPGJXAvjhTNz+WBD6/Qkd0VrGxkKpWInxqJHLpV8coKXj5Bnbaw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <!-- Main CSS -->
-  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" referrerpolicy="no-referrer" />
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <!-- Sticky Navbar -->
   <header id="navbar">
     <div class="nav-container">
-      <div class="logo">LocalBhai</div>
-      <nav>
-        <ul>
-          <li><a href="#hero">Home</a></li>
-          <li><a href="#food">Food</a></li>
-          <li><a href="#kirana">Kirana</a></li>
-          <li><a href="#vet">Vet</a></li>
-          <li><a href="#services">Services</a></li>
-        </ul>
+      <div class="brand">
+        <span class="brand-logo">🏠</span>
+        <span class="brand-name">LocalBhai</span>
+      </div>
+      <nav class="nav-links">
+        <a href="#hero">Home</a>
+        <a href="#food">Food</a>
+        <a href="#kirana">Kirana</a>
+        <a href="#vet">Vet</a>
+        <a href="#farmers">Farmers</a>
+        <a href="#services">Services</a>
       </nav>
-      <div class="search">
-        <input type="text" id="searchInput" placeholder="Search vendors, items, services...">
+      <div class="search-wrap">
         <i class="fa fa-search"></i>
+        <input type="text" id="globalSearch" placeholder="Search restaurants, kirana, vets, services..." />
       </div>
     </div>
   </header>
-  <main>
-    <section id="hero" class="hero section-visible">
-      <div class="hero-content">
-        <h1>LocalBhai</h1>
-        <p>Apka Seher Ka Bhai</p>
+
+  <!-- Hero -->
+  <section id="hero" class="hero section-visible">
+    <div class="hero-inner">
+      <h1>LocalBhai</h1>
+      <p class="tagline">Apka Seher Ka Bhai</p>
+      <div class="cta-row">
+        <a href="#food" class="btn btn-primary"><i class="fa fa-utensils"></i> Order Food</a>
+        <a href="#services" class="btn btn-ghost"><i class="fa fa-bolt"></i> Book a Service</a>
       </div>
-    </section>
-    <section id="food" class="section">
-      <h2>Food Delivery</h2>
-      <div id="foodList" class="card-grid"></div>
-    </section>
-    <section id="kirana" class="section">
-      <h2>Kirana & Essentials</h2>
-      <div id="kiranaList" class="card-grid"></div>
-    </section>
-    <section id="vet" class="section">
-      <h2>Vet Services</h2>
-      <div class="vet-container">
-        <div class="vet-col">
-          <h3>Providers</h3>
-          <div id="vetProviders" class="card-grid"></div>
-        </div>
-        <div class="vet-col">
-          <h3>Requests</h3>
-          <div id="vetSeekers" class="card-grid"></div>
-        </div>
+    </div>
+  </section>
+
+  <!-- Food Delivery -->
+  <section id="food" class="section">
+    <div class="section-head">
+      <h2><i class="fa fa-burger"></i> Food Delivery</h2>
+      <p>Handpicked local restaurants near you</p>
+    </div>
+    <div id="foodList" class="grid"></div>
+  </section>
+
+  <!-- Kirana & Essentials -->
+  <section id="kirana" class="section">
+    <div class="section-head">
+      <h2><i class="fa fa-basket-shopping"></i> Kirana & Essentials</h2>
+      <p>Daily groceries delivered fast</p>
+    </div>
+    <div id="kiranaList" class="grid"></div>
+  </section>
+
+  <!-- Vet Services -->
+  <section id="vet" class="section">
+    <div class="section-head">
+      <h2><i class="fa fa-paw"></i> Vet Services</h2>
+      <p>Licensed vets & community requests</p>
+    </div>
+    <div class="split">
+      <div class="split-col">
+        <h3 class="subhead"><i class="fa fa-user-doctor"></i> Service Providers</h3>
+        <div id="vetProviders" class="grid"></div>
       </div>
-    </section>
-    <section id="services" class="section">
-      <h2>General Service Providers</h2>
-      <div id="serviceList" class="card-grid"></div>
-    </section>
-  </main>
+      <div class="split-col">
+        <h3 class="subhead"><i class="fa fa-hand-holding-heart"></i> Service Seekers</h3>
+        <div id="vetSeekers" class="grid"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Farmers & Agri -->
+  <section id="farmers" class="section">
+    <div class="section-head">
+      <h2><i class="fa fa-tractor"></i> Farmers & Agri Support</h2>
+      <p>Local agri services and farmer requests</p>
+    </div>
+    <div class="split">
+      <div class="split-col">
+        <h3 class="subhead"><i class="fa fa-seedling"></i> Agri Services</h3>
+        <div id="agriServices" class="grid"></div>
+      </div>
+      <div class="split-col">
+        <h3 class="subhead"><i class="fa fa-wheat-awn"></i> Farmer Requests</h3>
+        <div id="farmerRequests" class="grid"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- General Service Providers -->
+  <section id="services" class="section">
+    <div class="section-head">
+      <h2><i class="fa fa-toolbox"></i> General Service Providers</h2>
+      <p>Electricians, plumbers, carpenters and more</p>
+    </div>
+    <div id="serviceList" class="grid"></div>
+  </section>
+
+  <!-- Footer -->
   <footer>
     <p>Made with <span class="heart">❤️</span> in Odisha by LocalBhai</p>
   </footer>
 
   <!-- Confirmation Modal -->
   <div id="confirmModal" class="modal">
-    <div class="modal-content">
-      <span id="confirmClose" class="close">&times;</span>
-      <p id="confirmMessage"></p>
+    <div class="modal-card">
+      <button class="modal-close" id="confirmClose" aria-label="Close">&times;</button>
+      <div class="modal-body">
+        <div class="modal-emoji">✅</div>
+        <p id="confirmMessage">Order Confirmed! Vendor Notified. Delivery on the way 🚴</p>
+        <button class="btn btn-primary" id="confirmOk">OK</button>
+      </div>
     </div>
   </div>
 
   <!-- Detail Modal -->
   <div id="detailModal" class="modal">
-    <div class="modal-content">
-      <span id="detailClose" class="close">&times;</span>
-      <div id="detailBody"></div>
+    <div class="modal-card">
+      <button class="modal-close" id="detailClose" aria-label="Close">&times;</button>
+      <div class="modal-body" id="detailBody"></div>
     </div>
   </div>
 
+  <!-- Scripts -->
+  <script src="script.js"></script>
+</body>
+</html>
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>LocalBhai — Apka Seher Ka Bhai</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" referrerpolicy="no-referrer" />
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Sticky Navbar -->
+  <header id="navbar">
+    <div class="nav-container">
+      <div class="brand">
+        <span class="brand-logo">🏠</span>
+        <span class="brand-name">LocalBhai</span>
+      </div>
+      <nav class="nav-links">
+        <a href="#hero">Home</a>
+        <a href="#food">Food</a>
+        <a href="#kirana">Kirana</a>
+        <a href="#vet">Vet</a>
+        <a href="#farmers">Farmers</a>
+        <a href="#services">Services</a>
+      </nav>
+      <div class="search-wrap">
+        <i class="fa fa-search"></i>
+        <input type="text" id="globalSearch" placeholder="Search restaurants, kirana, vets, services..." />
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section id="hero" class="hero section-visible">
+    <div class="hero-inner">
+      <h1>LocalBhai</h1>
+      <p class="tagline">Apka Seher Ka Bhai</p>
+      <div class="cta-row">
+        <a href="#food" class="btn btn-primary"><i class="fa fa-utensils"></i> Order Food</a>
+        <a href="#services" class="btn btn-ghost"><i class="fa fa-bolt"></i> Book a Service</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Food Delivery -->
+  <section id="food" class="section">
+    <div class="section-head">
+      <h2><i class="fa fa-burger"></i> Food Delivery</h2>
+      <p>Handpicked local restaurants near you</p>
+    </div>
+    <div id="foodList" class="grid"></div>
+  </section>
+
+  <!-- Kirana & Essentials -->
+  <section id="kirana" class="section">
+    <div class="section-head">
+      <h2><i class="fa fa-basket-shopping"></i> Kirana & Essentials</h2>
+      <p>Daily groceries delivered fast</p>
+    </div>
+    <div id="kiranaList" class="grid"></div>
+  </section>
+
+  <!-- Vet Services -->
+  <section id="vet" class="section">
+    <div class="section-head">
+      <h2><i class="fa fa-paw"></i> Vet Services</h2>
+      <p>Licensed vets & community requests</p>
+    </div>
+    <div class="split">
+      <div class="split-col">
+        <h3 class="subhead"><i class="fa fa-user-doctor"></i> Service Providers</h3>
+        <div id="vetProviders" class="grid"></div>
+      </div>
+      <div class="split-col">
+        <h3 class="subhead"><i class="fa fa-hand-holding-heart"></i> Service Seekers</h3>
+        <div id="vetSeekers" class="grid"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Farmers & Agri -->
+  <section id="farmers" class="section">
+    <div class="section-head">
+      <h2><i class="fa fa-tractor"></i> Farmers & Agri Support</h2>
+      <p>Local agri services and farmer requests</p>
+    </div>
+    <div class="split">
+      <div class="split-col">
+        <h3 class="subhead"><i class="fa fa-seedling"></i> Agri Services</h3>
+        <div id="agriServices" class="grid"></div>
+      </div>
+      <div class="split-col">
+        <h3 class="subhead"><i class="fa fa-wheat-awn"></i> Farmer Requests</h3>
+        <div id="farmerRequests" class="grid"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- General Service Providers -->
+  <section id="services" class="section">
+    <div class="section-head">
+      <h2><i class="fa fa-toolbox"></i> General Service Providers</h2>
+      <p>Electricians, plumbers, carpenters and more</p>
+    </div>
+    <div id="serviceList" class="grid"></div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>Made with <span class="heart">❤️</span> in Odisha by LocalBhai</p>
+  </footer>
+
+  <!-- Confirmation Modal -->
+  <div id="confirmModal" class="modal">
+    <div class="modal-card">
+      <button class="modal-close" id="confirmClose" aria-label="Close">&times;</button>
+      <div class="modal-body">
+        <div class="modal-emoji">✅</div>
+        <p id="confirmMessage">Order Confirmed! Vendor Notified. Delivery on the way 🚴</p>
+        <button class="btn btn-primary" id="confirmOk">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail Modal -->
+  <div id="detailModal" class="modal">
+    <div class="modal-card">
+      <button class="modal-close" id="detailClose" aria-label="Close">&times;</button>
+      <div class="modal-body" id="detailBody"></div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
   <script src="script.js"></script>
 </body>
 </html>
