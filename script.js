@@ -5,7 +5,7 @@
    Data
    ========================= */
 
-// Food
+// Food vendors
 const foodVendors = [
   { name: "Odia Zaika", cuisine: "Odia Thali", rating: 4.5, time: "30 min" },
   { name: "Chhapan Bhog", cuisine: "Sweets & Snacks", rating: 4.3, time: "20 min" },
@@ -14,7 +14,7 @@ const foodVendors = [
   { name: "Masala Box", cuisine: "South Indian", rating: 4.4, time: "25 min" }
 ];
 
-// Kirana
+// Kirana items
 const kiranaItems = [
   { name: "Fortune Atta", price: "₹250 / 10kg" },
   { name: "Amul Milk 1L", price: "₹55" },
@@ -48,7 +48,7 @@ const farmerRequests = [
   { crop: "Groundnut", need: "Soil Test", location: "Khordha" }
 ];
 
-// General services
+// General service providers
 const serviceProviders = [
   { name: "Sanjay Electric Works", type: "Electrician", location: "Nirakarpur" },
   { name: "Manoj Plumber Services", type: "Plumber", location: "Nirakarpur" },
@@ -62,13 +62,7 @@ const serviceProviders = [
 
 const cart = [];
 
-/**
- * Create an element with optional class and innerHTML
- * @param {string} tag 
- * @param {string} [className] 
- * @param {string} [html] 
- * @returns {HTMLElement}
- */
+/** Create an element with optional class and inner HTML */
 const el = (tag, className, html) => {
   const e = document.createElement(tag);
   if (className) e.className = className;
@@ -76,11 +70,7 @@ const el = (tag, className, html) => {
   return e;
 };
 
-/**
- * Create a card element with title, meta info, lines, and action buttons
- * @param {object} param0 
- * @returns {HTMLElement}
- */
+/** Create a card: title + optional meta + lines + actions */
 function createCard({ title, lines = [], meta = [], actions = [] }) {
   const card = el('div', 'card');
   const h = el('h4', null, title);
@@ -105,7 +95,7 @@ function createCard({ title, lines = [], meta = [], actions = [] }) {
   return card;
 }
 
-// Debounce function for search input
+/** Debounce function: limits calls to once per delay */
 const debounce = (fn, delay = 150) => {
   let t;
   return (...args) => {
@@ -121,15 +111,14 @@ const debounce = (fn, delay = 150) => {
 let lastFocus = null;
 let untrap = () => {};
 
-/**
- * Trap keyboard focus inside modal
- * @param {HTMLElement} modal 
- * @returns {Function} cleanup function
- */
+/** Trap focus within a modal */
 function trapFocus(modal) {
-  const focusables = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-  if (!focusables.length) return () => { };
-  const first = focusables[0], last = focusables[focusables.length - 1];
+  const focusables = modal.querySelectorAll(
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+  );
+  if (!focusables.length) return () => {};
+  const first = focusables[0];
+  const last = focusables[focusables.length - 1];
   function handler(e) {
     if (e.key === 'Tab') {
       if (e.shiftKey && document.activeElement === first) {
@@ -148,10 +137,7 @@ function trapFocus(modal) {
   return () => modal.removeEventListener('keydown', handler);
 }
 
-/**
- * Open modal and manage focus and aria attributes
- * @param {HTMLElement} modal 
- */
+/** Open a modal and trap focus */
 function openModal(modal) {
   if (!modal) return;
   lastFocus = document.activeElement;
@@ -159,170 +145,77 @@ function openModal(modal) {
   modal.style.display = 'flex';
   modal.setAttribute('aria-hidden', 'false');
   untrap = trapFocus(modal);
-  // Focus first autofocus element or first button or modal itself
   const autofocusEl = modal.querySelector('[autofocus]');
   if (autofocusEl) autofocusEl.focus();
   else {
-    const firstBtn = modal.querySelector('button, [tabindex]:not([tabindex="-1"])');
-    if (firstBtn) firstBtn.focus();
+    const firstFocusable = modal.querySelector('button, [tabindex]:not([tabindex="-1"])');
+    if (firstFocusable) firstFocusable.focus();
     else modal.focus();
   }
 }
 
-/**
- * Close modal and restore focus and aria attributes
- * @param {HTMLElement} modal 
- */
+/** Close a modal and restore focus */
 function closeModal(modal) {
   if (!modal) return;
   modal.style.display = 'none';
   modal.setAttribute('aria-hidden', 'true');
   document.body.classList.remove('modal-open');
-  untrap();
-  untrap = () => { };
+  untrap(); untrap = () => {};
   if (lastFocus) lastFocus.focus();
 }
 
-/**
- * Close any open modal
- */
+/** Close whichever modal is open */
 function closeAnyModal() {
   ['confirmModal', 'detailModal'].forEach(id => {
-    const modal = document.getElementById(id);
-    if (modal && modal.style.display === 'flex') closeModal(modal);
+    const m = document.getElementById(id);
+    if (m && m.style.display === 'flex') closeModal(m);
   });
 }
 
-/* =========================
-   Public Modal APIs
-   ========================= */
-
-/**
- * Show confirmation modal with message
- * @param {string} message 
- */
+// Modal wrappers
 function showConfirm(message) {
   const modal = document.getElementById('confirmModal');
-  if (!modal) return;
   const msgEl = document.getElementById('confirmMessage');
   if (msgEl) msgEl.textContent = message;
   openModal(modal);
 }
+function hideConfirm() { closeModal(document.getElementById('confirmModal')); }
 
-/**
- * Hide confirmation modal
- */
-function hideConfirm() {
-  closeModal(document.getElementById('confirmModal'));
-}
-
-/**
- * Show detail modal with HTML content and optional title
- * @param {string} html 
- * @param {string} [title] 
- */
 function showDetailsHTML(html, title = 'Details') {
   const modal = document.getElementById('detailModal');
   const body = document.getElementById('detailBody');
   if (!modal || !body) return;
-  // Clear previous content
   body.innerHTML = '';
-  // Create heading with title
   const heading = el('h3', null, title);
-  heading.id = 'detailTitle';
-  heading.tabIndex = -1;
+  heading.id = 'detailTitle'; heading.tabIndex = -1;
   body.appendChild(heading);
-  // Insert content
   const content = el('div');
   content.innerHTML = html;
   body.appendChild(content);
-
-  // Attach event listeners for buttons inside modal content
-  // Use event delegation
+  // button IDs replaced in generic simulation; hooking
   body.querySelectorAll('button').forEach(btn => {
     if (btn.id === 'detailBook') {
-      btn.onclick = () => {
-        hideDetails();
-        simulateFlow('Vet Service Request');
-      };
+      btn.onclick = () => { hideDetails(); simulateFlow('Vet Service Request'); };
     } else if (btn.id === 'frHelp') {
-      btn.onclick = () => {
-        hideDetails();
-        simulateFlow('Farmer Help Offer');
-      };
+      btn.onclick = () => { hideDetails(); simulateFlow('Farmer Help Offer'); };
     }
   });
-
   openModal(modal);
 }
+function hideDetails() { closeModal(document.getElementById('detailModal')); }
 
-/**
- * Hide detail modal
- */
-function hideDetails() {
-  closeModal(document.getElementById('detailModal'));
-}
-
-/* =========================
-   Global Event Listeners
-   ========================= */
-
-window.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeAnyModal();
-});
-
+// Global events
+window.addEventListener('keydown', e => { if (e.key === 'Escape') closeAnyModal(); });
 window.addEventListener('click', e => {
   if (e.target === document.getElementById('confirmModal')) hideConfirm();
   if (e.target === document.getElementById('detailModal')) hideDetails();
 });
 
 /* =========================
-   Cart Management
+   Cart
    ========================= */
 
-/**
- * Add item to cart or increase quantity if exists
- * @param {string} name 
- */
-function addToCart(name) {
-  if (!name) return;
-  const existing = cart.find(item => item.name === name);
-  if (existing) {
-    existing.quantity++;
-  } else {
-    cart.push({ name, quantity: 1 });
-  }
-  updateCartCount();
-  showConfirm(`${name} added to cart!`);
-}
-
-/**
- * Remove item from cart by name
- * @param {string} name 
- */
-function removeFromCart(name) {
-  const index = cart.findIndex(item => item.name === name);
-  if (index !== -1) {
-    cart.splice(index, 1);
-    updateCartCount();
-  }
-}
-
-/**
- * Update cart count badge
- */
-function updateCartCount() {
-  const badge = ensureCartBadge();
-  if (!badge) return;
-  const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-  badge.textContent = String(totalCount);
-  badge.style.display = totalCount ? 'flex' : 'none';
-}
-
-/**
- * Ensure cart badge exists in DOM
- * @returns {HTMLElement|null}
- */
+/** Ensure the cart badge exists */
 function ensureCartBadge() {
   let badge = document.querySelector('.cart-count');
   if (!badge) {
@@ -336,14 +229,32 @@ function ensureCartBadge() {
   return badge;
 }
 
+/** Update cart count badge */
+function updateCartCount() {
+  const badge = ensureCartBadge();
+  if (!badge) return;
+  const total = cart.reduce((sum, item) => sum + item.quantity, 0);
+  badge.textContent = String(total);
+  badge.style.display = total ? 'flex' : 'none';
+}
+
+/** Add item to cart */
+function addToCart(name) {
+  if (!name) return;
+  const existing = cart.find(item => item.name === name);
+  if (existing) {
+    existing.quantity++;
+  } else {
+    cart.push({ name, quantity: 1 });
+  }
+  updateCartCount();
+  showConfirm(`${name} added to cart!`);
+}
+
 /* =========================
    Simulated Order Flow
    ========================= */
 
-/**
- * Simulate order flow with confirmation and alerts
- * @param {string} name 
- */
 function simulateFlow(name) {
   showConfirm(`Order Confirmed! ${name} notified. Delivery on the way 🚴`);
   setTimeout(() => alert(`Vendor accepted the ${name} request!`), 1500);
@@ -359,14 +270,14 @@ function renderFood() {
   if (!wrap) return;
   wrap.innerHTML = '';
   foodVendors.forEach(v => {
-    const c = createCard({
+    const card = createCard({
       title: v.name,
       meta: [`⭐ ${v.rating}`, v.time],
       lines: [v.cuisine],
       actions: [{ label: 'Order Now', icon: 'fa fa-motorcycle', onClick: () => simulateFlow(v.name) }]
     });
-    c.dataset.search = `${v.name} ${v.cuisine}`.toLowerCase();
-    wrap.appendChild(c);
+    card.dataset.search = `${v.name} ${v.cuisine}`.toLowerCase();
+    wrap.appendChild(card);
   });
 }
 
@@ -375,7 +286,7 @@ function renderKirana() {
   if (!wrap) return;
   wrap.innerHTML = '';
   kiranaItems.forEach(it => {
-    const c = createCard({
+    const card = createCard({
       title: it.name,
       lines: [it.price],
       actions: [
@@ -383,44 +294,45 @@ function renderKirana() {
         { label: 'Order Now', icon: 'fa fa-bolt', onClick: () => simulateFlow(it.name) }
       ]
     });
-    c.dataset.search = `${it.name} ${it.price}`.toLowerCase();
-    wrap.appendChild(c);
+    card.dataset.search = `${it.name} ${it.price}`.toLowerCase();
+    wrap.appendChild(card);
   });
 }
 
 function renderVets() {
-  const provWrap = document.getElementById('vetProviders');
-  if (!provWrap) return;
-  provWrap.innerHTML = '';
+  const prov = document.getElementById('vetProviders');
+  if (!prov) return;
+  prov.innerHTML = '';
   vetProviders.forEach(v => {
-    const c = createCard({
+    const card = createCard({
       title: v.name,
       lines: [`${v.specialty} • ${v.location}`, `Consultation Fee: ${v.fee}`],
       actions: [{ label: 'Book Now', icon: 'fa fa-calendar-check', onClick: () => simulateFlow(v.name) }]
     });
-    c.dataset.search = `${v.name} ${v.specialty} ${v.location}`.toLowerCase();
-    provWrap.appendChild(c);
+    card.dataset.search = `${v.name} ${v.specialty} ${v.location}`.toLowerCase();
+    prov.appendChild(card);
   });
 
-  const seekWrap = document.getElementById('vetSeekers');
-  if (!seekWrap) return;
-  seekWrap.innerHTML = '';
-  vetSeekers.forEach(r => {
-    const c = createCard({
-      title: r.animal,
-      lines: [`Service: ${r.service}`, `Location: ${r.location}`],
+  const seek = document.getElementById('vetSeekers');
+  if (!seek) return;
+  seek.innerHTML = '';
+  vetSeekers.forEach(req => {
+    const card = createCard({
+      title: req.animal,
+      lines: [`Service: ${req.service}`, `Location: ${req.location}`],
       actions: [{
-        label: 'View Details', icon: 'fa fa-eye', variant: 'btn-ghost', onClick: () => {
+        label: 'View Details', icon: 'fa fa-eye', variant: 'btn-ghost',
+        onClick: () => {
           showDetailsHTML(`
-            <p><strong>Service Needed:</strong> ${r.service}</p>
-            <p><strong>Location:</strong> ${r.location}</p>
+            <p><strong>Service Needed:</strong> ${req.service}</p>
+            <p><strong>Location:</strong> ${req.location}</p>
             <button class="btn btn-primary" id="detailBook">Notify Vet</button>
-          `, `${r.animal} Service Request`);
+          `, `${req.animal} Service Request`);
         }
       }]
     });
-    c.dataset.search = `${r.animal} ${r.service} ${r.location}`.toLowerCase();
-    seekWrap.appendChild(c);
+    card.dataset.search = `${req.animal} ${req.service} ${req.location}`.toLowerCase();
+    seek.appendChild(card);
   });
 }
 
@@ -428,35 +340,36 @@ function renderFarmers() {
   const agriWrap = document.getElementById('agriServices');
   if (!agriWrap) return;
   agriWrap.innerHTML = '';
-  agriServices.forEach(a => {
-    const c = createCard({
-      title: a.name,
-      lines: [`${a.type} • ${a.location}`],
-      actions: [{ label: 'Contact Now', icon: 'fa fa-phone', onClick: () => simulateFlow(a.name) }]
+  agriServices.forEach(srv => {
+    const card = createCard({
+      title: srv.name,
+      lines: [`${srv.type} • ${srv.location}`],
+      actions: [{ label: 'Contact Now', icon: 'fa fa-phone', onClick: () => simulateFlow(srv.name) }]
     });
-    c.dataset.search = `${a.name} ${a.type} ${a.location}`.toLowerCase();
-    agriWrap.appendChild(c);
+    card.dataset.search = `${srv.name} ${srv.type} ${srv.location}`.toLowerCase();
+    agriWrap.appendChild(card);
   });
 
   const reqWrap = document.getElementById('farmerRequests');
   if (!reqWrap) return;
   reqWrap.innerHTML = '';
-  farmerRequests.forEach(fr => {
-    const c = createCard({
-      title: fr.crop,
-      lines: [`Need: ${fr.need}`, `Location: ${fr.location}`],
+  farmerRequests.forEach(req => {
+    const card = createCard({
+      title: req.crop,
+      lines: [`Need: ${req.need}`, `Location: ${req.location}`],
       actions: [{
-        label: 'View Details', icon: 'fa fa-eye', variant: 'btn-ghost', onClick: () => {
+        label: 'View Details', icon: 'fa fa-eye', variant: 'btn-ghost',
+        onClick: () => {
           showDetailsHTML(`
-            <p><strong>Need:</strong> ${fr.need}</p>
-            <p><strong>Location:</strong> ${fr.location}</p>
+            <p><strong>Need:</strong> ${req.need}</p>
+            <p><strong>Location:</strong> ${req.location}</p>
             <button class="btn btn-primary" id="frHelp">Offer Help</button>
-          `, `${fr.crop} Request`);
+          `, `${req.crop} Request`);
         }
       }]
     });
-    c.dataset.search = `${fr.crop} ${fr.need} ${fr.location}`.toLowerCase();
-    reqWrap.appendChild(c);
+    card.dataset.search = `${req.crop} ${req.need} ${req.location}`.toLowerCase();
+    reqWrap.appendChild(card);
   });
 }
 
@@ -465,32 +378,24 @@ function renderServices() {
   if (!wrap) return;
   wrap.innerHTML = '';
   serviceProviders.forEach(s => {
-    const c = createCard({
+    const card = createCard({
       title: s.name,
       lines: [`${s.type} • ${s.location}`],
       actions: [{ label: 'Book Now', icon: 'fa fa-wrench', onClick: () => simulateFlow(s.name) }]
     });
-    c.dataset.search = `${s.name} ${s.type} ${s.location}`.toLowerCase();
-    wrap.appendChild(c);
+    card.dataset.search = `${s.name} ${s.type} ${s.location}`.toLowerCase();
+    wrap.appendChild(card);
   });
 }
 
 /* =========================
-   Search + Reveal + Events
+   Search + Reveal + Init
    ========================= */
 
-/**
- * Initialize search input filtering
- */
 function initSearch() {
   const input = document.getElementById('globalSearch');
   if (!input) return;
-
-  // Prevent form submission if inside a form
-  if (input.form) {
-    input.form.addEventListener('submit', e => e.preventDefault());
-  }
-
+  if (input.form) input.form.addEventListener('submit', e => e.preventDefault());
   const run = () => {
     const q = (input.value || '').trim().toLowerCase();
     document.querySelectorAll('.grid .card').forEach(card => {
@@ -501,12 +406,45 @@ function initSearch() {
   input.addEventListener('input', debounce(run, 150));
 }
 
-/**
- * Initialize section reveal on scroll
- */
 function initReveal() {
+  const sections = document.querySelectorAll('.section');
   if (!('IntersectionObserver' in window)) {
-    // Fallback: show all sections
+    sections.forEach(s => s.classList.add('section-visible'));
+    return;
+  }
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('section-visible');
+        obs.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.2 });
+  sections.forEach(sec => obs.observe(sec));
+}
+
+function initModals() {
+  const confirmClose = document.getElementById('confirmClose');
+  const confirmOk    = document.getElementById('confirmOk');
+  const detailClose  = document.getElementById('detailClose');
+  if (confirmClose) confirmClose.onclick = hideConfirm;
+  if (confirmOk)    confirmOk.onclick    = hideConfirm;
+  if (detailClose)  detailClose.onclick  = hideDetails;
+}
+
+/* Init all on DOM ready */
+document.addEventListener('DOMContentLoaded', () => {
+  renderFood();
+  renderKirana();
+  renderVets();
+  renderFarmers();
+  renderServices();
+  initSearch();
+  initReveal();
+  initModals();
+  ensureCartBadge(); // prepare cart badge
+});
+
 
 
 
