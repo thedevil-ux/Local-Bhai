@@ -5,6 +5,7 @@
   <meta charset="UTF-8" />
   <title>LocalBhai — Apka Seher Ka Bhai</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="LocalBhai - Your neighborhood platform for food delivery, kirana essentials, vet services, agriculture support, and general services in Odisha." />
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet" />
   <!-- Font Awesome Icons -->
@@ -14,13 +15,13 @@
 </head>
 <body>
   <!-- Sticky Navbar -->
-  <header id="navbar">
+  <header id="navbar" role="banner">
     <div class="nav-container">
       <div class="brand">
-        <span class="brand-logo">🏠</span>
+        <span class="brand-logo" aria-hidden="true">🏠</span>
         <span class="brand-name">LocalBhai</span>
       </div>
-      <nav class="nav-links">
+      <nav class="nav-links" aria-label="Primary navigation">
         <a href="#hero">Home</a>
         <a href="#food">Food</a>
         <a href="#kirana">Kirana</a>
@@ -28,99 +29,103 @@
         <a href="#farmers">Farmers</a>
         <a href="#services">Services</a>
       </nav>
-      <div class="search-wrap">
-        <i class="fa fa-search"></i>
-        <input type="text" id="globalSearch" placeholder="Search restaurants, kirana, vets, services..." />
-      </div>
+      <form class="search-wrap" role="search" aria-label="Site search" onsubmit="return false;">
+        <label for="globalSearch" class="sr-only">Search restaurants, kirana, vets, services</label>
+        <i class="fa fa-search" aria-hidden="true"></i>
+        <input type="search" id="globalSearch" name="q" placeholder="Search restaurants, kirana, vets, services..." autocomplete="off" />
+        <button type="submit" class="sr-only">Search</button>
+      </form>
     </div>
   </header>
 
-  <!-- Hero -->
-  <section id="hero" class="hero section-visible">
-    <div class="hero-inner">
-      <h1>LocalBhai</h1>
-      <p class="tagline">Apka Seher Ka Bhai</p>
-      <div class="cta-row">
-        <a href="#food" class="btn btn-primary"><i class="fa fa-utensils"></i> Order Food</a>
-        <a href="#services" class="btn btn-ghost"><i class="fa fa-bolt"></i> Book a Service</a>
+  <main>
+    <!-- Hero -->
+    <section id="hero" class="hero section-visible" tabindex="-1" aria-label="Hero section">
+      <div class="hero-inner">
+        <h1>LocalBhai</h1>
+        <p class="tagline">Apka Seher Ka Bhai</p>
+        <div class="cta-row">
+          <a href="#food" class="btn btn-primary"><i class="fa fa-utensils" aria-hidden="true"></i> Order Food</a>
+          <a href="#services" class="btn btn-ghost"><i class="fa fa-bolt" aria-hidden="true"></i> Book a Service</a>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Food Delivery -->
-  <section id="food" class="section">
-    <div class="section-head">
-      <h2><i class="fa fa-burger"></i> Food Delivery</h2>
-      <p>Handpicked local restaurants near you</p>
-    </div>
-    <div id="foodList" class="grid"></div>
-  </section>
-
-  <!-- Kirana & Essentials -->
-  <section id="kirana" class="section">
-    <div class="section-head">
-      <h2><i class="fa fa-basket-shopping"></i> Kirana & Essentials</h2>
-      <p>Daily groceries delivered fast</p>
-    </div>
-    <div id="kiranaList" class="grid"></div>
-  </section>
-
-  <!-- Vet Services -->
-  <section id="vet" class="section">
-    <div class="section-head">
-      <h2><i class="fa fa-paw"></i> Vet Services</h2>
-      <p>Licensed vets & community requests</p>
-    </div>
-    <div class="split">
-      <div class="split-col">
-        <h3 class="subhead"><i class="fa fa-user-doctor"></i> Service Providers</h3>
-        <div id="vetProviders" class="grid"></div>
+    <!-- Food Delivery -->
+    <section id="food" class="section" aria-labelledby="foodHeading">
+      <div class="section-head">
+        <h2 id="foodHeading"><i class="fa fa-burger" aria-hidden="true"></i> Food Delivery</h2>
+        <p>Handpicked local restaurants near you</p>
       </div>
-      <div class="split-col">
-        <h3 class="subhead"><i class="fa fa-hand-holding-heart"></i> Service Seekers</h3>
-        <div id="vetSeekers" class="grid"></div>
-      </div>
-    </div>
-  </section>
+      <div id="foodList" class="grid" aria-live="polite" aria-relevant="additions"></div>
+    </section>
 
-  <!-- Farmers & Agri -->
-  <section id="farmers" class="section">
-    <div class="section-head">
-      <h2><i class="fa fa-tractor"></i> Farmers & Agri Support</h2>
-      <p>Local agri services and farmer requests</p>
-    </div>
-    <div class="split">
-      <div class="split-col">
-        <h3 class="subhead"><i class="fa fa-seedling"></i> Agri Services</h3>
-        <div id="agriServices" class="grid"></div>
+    <!-- Kirana & Essentials -->
+    <section id="kirana" class="section" aria-labelledby="kiranaHeading">
+      <div class="section-head">
+        <h2 id="kiranaHeading"><i class="fa fa-basket-shopping" aria-hidden="true"></i> Kirana & Essentials</h2>
+        <p>Daily groceries delivered fast</p>
       </div>
-      <div class="split-col">
-        <h3 class="subhead"><i class="fa fa-wheat-awn"></i> Farmer Requests</h3>
-        <div id="farmerRequests" class="grid"></div>
-      </div>
-    </div>
-  </section>
+      <div id="kiranaList" class="grid" aria-live="polite" aria-relevant="additions"></div>
+    </section>
 
-  <!-- General Service Providers -->
-  <section id="services" class="section">
-    <div class="section-head">
-      <h2><i class="fa fa-toolbox"></i> General Service Providers</h2>
-      <p>Electricians, plumbers, carpenters and more</p>
-    </div>
-    <div id="serviceList" class="grid"></div>
-  </section>
+    <!-- Vet Services -->
+    <section id="vet" class="section" aria-labelledby="vetHeading">
+      <div class="section-head">
+        <h2 id="vetHeading"><i class="fa fa-paw" aria-hidden="true"></i> Vet Services</h2>
+        <p>Licensed vets & community requests</p>
+      </div>
+      <div class="split">
+        <div class="split-col" aria-labelledby="vetProvidersHeading">
+          <h3 id="vetProvidersHeading" class="subhead"><i class="fa fa-user-doctor" aria-hidden="true"></i> Service Providers</h3>
+          <div id="vetProviders" class="grid" aria-live="polite" aria-relevant="additions"></div>
+        </div>
+        <div class="split-col" aria-labelledby="vetSeekersHeading">
+          <h3 id="vetSeekersHeading" class="subhead"><i class="fa fa-hand-holding-heart" aria-hidden="true"></i> Service Seekers</h3>
+          <div id="vetSeekers" class="grid" aria-live="polite" aria-relevant="additions"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Farmers & Agri -->
+    <section id="farmers" class="section" aria-labelledby="farmersHeading">
+      <div class="section-head">
+        <h2 id="farmersHeading"><i class="fa fa-tractor" aria-hidden="true"></i> Farmers & Agri Support</h2>
+        <p>Local agri services and farmer requests</p>
+      </div>
+      <div class="split">
+        <div class="split-col" aria-labelledby="agriServicesHeading">
+          <h3 id="agriServicesHeading" class="subhead"><i class="fa fa-seedling" aria-hidden="true"></i> Agri Services</h3>
+          <div id="agriServices" class="grid" aria-live="polite" aria-relevant="additions"></div>
+        </div>
+        <div class="split-col" aria-labelledby="farmerRequestsHeading">
+          <h3 id="farmerRequestsHeading" class="subhead"><i class="fa fa-wheat-awn" aria-hidden="true"></i> Farmer Requests</h3>
+          <div id="farmerRequests" class="grid" aria-live="polite" aria-relevant="additions"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- General Service Providers -->
+    <section id="services" class="section" aria-labelledby="servicesHeading">
+      <div class="section-head">
+        <h2 id="servicesHeading"><i class="fa fa-toolbox" aria-hidden="true"></i> General Service Providers</h2>
+        <p>Electricians, plumbers, carpenters and more</p>
+      </div>
+      <div id="serviceList" class="grid" aria-live="polite" aria-relevant="additions"></div>
+    </section>
+  </main>
 
   <!-- Footer -->
-  <footer>
-    <p>Made with <span class="heart">❤️</span> in Odisha by LocalBhai</p>
+  <footer role="contentinfo">
+    <p>Made with <span class="heart" aria-label="love">❤️</span> in Odisha by LocalBhai</p>
   </footer>
 
   <!-- Confirmation Modal -->
-  <div id="confirmModal" class="modal">
+  <div id="confirmModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmMessage" aria-hidden="true" tabindex="-1">
     <div class="modal-card">
-      <button class="modal-close" id="confirmClose" aria-label="Close">&times;</button>
+      <button class="modal-close" id="confirmClose" aria-label="Close confirmation modal">&times;</button>
       <div class="modal-body">
-        <div class="modal-emoji">✅</div>
+        <div class="modal-emoji" aria-hidden="true">✅</div>
         <p id="confirmMessage">Order Confirmed! Vendor Notified. Delivery on the way 🚴</p>
         <button class="btn btn-primary" id="confirmOk">OK</button>
       </div>
@@ -128,9 +133,9 @@
   </div>
 
   <!-- Detail Modal -->
-  <div id="detailModal" class="modal">
+  <div id="detailModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="detailTitle" aria-describedby="detailBody" aria-hidden="true" tabindex="-1">
     <div class="modal-card">
-      <button class="modal-close" id="detailClose" aria-label="Close">&times;</button>
+      <button class="modal-close" id="detailClose" aria-label="Close detail modal">&times;</button>
       <div class="modal-body" id="detailBody"></div>
     </div>
   </div>
@@ -139,4 +144,5 @@
   <script src="script.js"></script>
 </body>
 </html>
+
 
