@@ -2,10 +2,10 @@
 'use strict';
 
 /* =========================
-   Dummy Data (Dynamic Cards)
+   Data
    ========================= */
 
-// 🍲 Food Delivery Vendors
+// Food
 const foodVendors = [
   { name: "Odia Zaika", cuisine: "Odia Thali", rating: 4.5, time: "30 min" },
   { name: "Chhapan Bhog", cuisine: "Sweets & Snacks", rating: 4.3, time: "20 min" },
@@ -14,7 +14,7 @@ const foodVendors = [
   { name: "Masala Box", cuisine: "South Indian", rating: 4.4, time: "25 min" }
 ];
 
-// 🛒 Kirana Items
+// Kirana
 const kiranaItems = [
   { name: "Fortune Atta", price: "₹250 / 10kg" },
   { name: "Amul Milk 1L", price: "₹55" },
@@ -24,34 +24,31 @@ const kiranaItems = [
   { name: "Wheat 10kg", price: "₹320" }
 ];
 
-// 🐄 Vet Services - Providers
+// Vet providers & seekers
 const vetProviders = [
   { name: "Dr. Priya Sahu", specialty: "Livestock Vet", location: "Cuttack", fee: "₹300" },
   { name: "Dr. Ramesh Nayak", specialty: "Pet Specialist", location: "Bhubaneswar", fee: "₹400" },
   { name: "Dr. Anjali Das", specialty: "Poultry Expert", location: "Puri", fee: "₹350" }
 ];
-
-// 🐕 Vet Services - Seekers (dummy requests)
 const vetSeekers = [
   { animal: "Cow", service: "Vaccination", location: "Khordha" },
   { animal: "Dog", service: "Skin Treatment", location: "Cuttack" },
   { animal: "Goat", service: "Checkup", location: "Khordha" }
 ];
 
-// 🌾 Farmers & Agri
+// Farmers & Agri
 const agriServices = [
   { name: "Krishi Seva Kendra", type: "Seeds & Fertilizers", location: "Khurda" },
   { name: "AgriLab Odisha", type: "Soil Testing", location: "Bhubaneswar" },
   { name: "GreenPump", type: "Irrigation Repair", location: "Cuttack" }
 ];
-
 const farmerRequests = [
   { crop: "Paddy", need: "Pest Diagnosis", location: "Nimapara" },
   { crop: "Vegetables", need: "Drip Setup", location: "Pipili" },
   { crop: "Groundnut", need: "Soil Test", location: "Khordha" }
 ];
 
-// 🛠️ General Service Providers
+// General services
 const serviceProviders = [
   { name: "Sanjay Electric Works", type: "Electrician", location: "Nirakarpur" },
   { name: "Manoj Plumber Services", type: "Plumber", location: "Nirakarpur" },
@@ -60,7 +57,7 @@ const serviceProviders = [
 ];
 
 /* =========================
-   Helpers
+   State & Helpers
    ========================= */
 
 const cart = [];
@@ -96,25 +93,108 @@ function createCard({ title, lines = [], meta = [], actions = [] }){
   return card;
 }
 
+// Debounce (for search)
+function debounce(fn, delay=150){
+  let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args), delay); };
+}
+
+/* =========================
+   Modal Management (a11y)
+   ========================= */
+
+let lastFocus = null;
+let untrap = ()=>{};
+
+function trapFocus(modal){
+  const focusables = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+  if(!focusables.length) return ()=>{};
+  const first = focusables[0], last = focusables[focusables.length-1];
+  function handler(e){
+    if(e.key === 'Tab'){
+      if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+      else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+    }
+    if(e.key === 'Escape'){ closeAnyModal(); }
+  }
+  modal.addEventListener('keydown', handler);
+  return ()=> modal.removeEventListener('keydown', handler);
+}
+
+function openModal(el){
+  lastFocus = document.activeElement;
+  document.body.classList.add('modal-open');
+  el.style.display = 'flex';
+  untrap = trapFocus(el);
+  (el.querySelector('[autofocus]') || el.querySelector('button') || el).focus();
+}
+function closeModal(el){
+  el.style.display = 'none';
+  document.body.classList.remove('modal-open');
+  untrap(); untrap = ()=>{};
+  if(lastFocus) lastFocus.focus();
+}
+function closeAnyModal(){
+  ['confirmModal','detailModal'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el && el.style.display === 'flex') closeModal(el);
+  });
+}
+
+// Public wrappers
 function showConfirm(message){
   document.getElementById('confirmMessage').textContent = message;
-  document.getElementById('confirmModal').style.display = 'flex';
+  openModal(document.getElementById('confirmModal'));
 }
-function hideConfirm(){
-  document.getElementById('confirmModal').style.display = 'none';
+function hideConfirm(){ closeModal(document.getElementById('confirmModal')); }
+function showDetailsHTML(html){
+  const m = document.getElementById('detailModal');
+  const body = document.getElementById('detailBody');
+  body.innerHTML = `<h3 id="detailTitle" tabindex="-1" autofocus></h3>${html}`;
+  openModal(m);
 }
-function showDetails(html){
-  document.getElementById('detailBody').innerHTML = html;
-  document.getElementById('detailModal').style.display = 'flex';
-}
-function hideDetails(){
-  document.getElementById('detailModal').style.display = 'none';
-}
+function hideDetails(){ closeModal(document.getElementById('detailModal')); }
+
+// Global ESC and backdrop click
+window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeAnyModal(); });
+window.addEventListener('click', (e)=>{
+  if(e.target === document.getElementById('confirmModal')) hideConfirm();
+  if(e.target === document.getElementById('detailModal')) hideDetails();
+});
+
+/* =========================
+   Actions
+   ========================= */
 
 function simulateFlow(name){
   showConfirm(`Order Confirmed! ${name} notified. Delivery on the way 🚴`);
   setTimeout(()=>alert(`Vendor accepted the ${name} request!`), 1500);
   setTimeout(()=>alert(`Delivery agent picked up your ${name}. Approaching soon 🚴`), 3500);
+}
+
+function ensureCartBadge(){
+  let badge = document.querySelector('.cart-count');
+  if(!badge){
+    const wrap = document.querySelector('.search-wrap');
+    if(!wrap) return;
+    badge = document.createElement('span');
+    badge.className = 'cart-count';
+    badge.textContent = '0';
+    wrap.appendChild(badge);
+  }
+  return badge;
+}
+
+function updateCartCount(){
+  const badge = ensureCartBadge();
+  if(!badge) return;
+  badge.textContent = String(cart.length);
+  badge.style.display = cart.length ? 'flex' : 'none';
+}
+
+function addToCart(name){
+  cart.push(name);
+  updateCartCount();
+  showConfirm(`${name} added to cart!`);
 }
 
 /* =========================
@@ -128,9 +208,7 @@ function renderFood(){
       title: v.name,
       meta: [`⭐ ${v.rating}`, v.time],
       lines: [v.cuisine],
-      actions: [{
-        label:'Order Now', icon:'fa fa-motorcycle', onClick:()=>simulateFlow(v.name)
-      }]
+      actions: [{ label:'Order Now', icon:'fa fa-motorcycle', onClick:()=>simulateFlow(v.name) }]
     });
     c.dataset.search = `${v.name} ${v.cuisine}`.toLowerCase();
     wrap.appendChild(c);
@@ -144,10 +222,7 @@ function renderKirana(){
       title: it.name,
       lines: [it.price],
       actions: [
-        { label:'Add to Cart', icon:'fa fa-cart-plus', variant:'btn-ghost', onClick:()=>{
-            cart.push(it.name);
-            showConfirm(`${it.name} added to cart!`);
-          }},
+        { label:'Add to Cart', icon:'fa fa-cart-plus', variant:'btn-ghost', onClick:()=>addToCart(it.name) },
         { label:'Order Now', icon:'fa fa-bolt', onClick:()=>simulateFlow(it.name) }
       ]
     });
@@ -174,8 +249,7 @@ function renderVets(){
       title: r.animal,
       lines: [`Service: ${r.service}`, `Location: ${r.location}`],
       actions: [{ label:'View Details', icon:'fa fa-eye', variant:'btn-ghost', onClick:()=>{
-        showDetails(`
-          <h3>${r.animal}</h3>
+        showDetailsHTML(`
           <p><strong>Service Needed:</strong> ${r.service}</p>
           <p><strong>Location:</strong> ${r.location}</p>
           <button class="btn btn-primary" id="detailBook">Notify Vet</button>
@@ -209,8 +283,7 @@ function renderFarmers(){
       title: fr.crop,
       lines: [`Need: ${fr.need}`, `Location: ${fr.location}`],
       actions: [{ label:'View Details', icon:'fa fa-eye', variant:'btn-ghost', onClick:()=>{
-        showDetails(`
-          <h3>${fr.crop}</h3>
+        showDetailsHTML(`
           <p><strong>Need:</strong> ${fr.need}</p>
           <p><strong>Location:</strong> ${fr.location}</p>
           <button class="btn btn-primary" id="frHelp">Offer Help</button>
@@ -244,14 +317,16 @@ function renderServices(){
    ========================= */
 
 function initSearch(){
-  const input = document.getElementById('globalSearch');
-  input.addEventListener('input', ()=>{
-    const q = input.value.trim().toLowerCase();
+  const input = document.getElementById('globalSearch') || document.getElementById('searchInput');
+  if(!input) return;
+  const run = ()=>{
+    const q = (input.value || '').trim().toLowerCase();
     document.querySelectorAll('.grid .card').forEach(card=>{
       const text = (card.dataset.search||'').toLowerCase();
       card.style.display = text.includes(q) ? '' : 'none';
     });
-  });
+  };
+  input.addEventListener('input', debounce(run, 120));
 }
 
 function initReveal(){
@@ -270,105 +345,11 @@ function initModals(){
   document.getElementById('confirmClose').onclick = hideConfirm;
   document.getElementById('confirmOk').onclick = hideConfirm;
   document.getElementById('detailClose').onclick = hideDetails;
-  window.addEventListener('click', (e)=>{
-    if(e.target === document.getElementById('confirmModal')) hideConfirm();
-    if(e.target === document.getElementById('detailModal')) hideDetails();
-  });
 }
 
 /* =========================
    Init
    ========================= */
-/* ---- debounce for search (saves CPU on phones) ---- */
-function debounce(fn, delay=200){
-  let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args), delay); };
-}
-function initSearch(){
-  const input = document.getElementById('globalSearch');
-  const run = ()=> {
-    const q = input.value.trim().toLowerCase();
-    document.querySelectorAll('.grid .card').forEach(card=>{
-      const text = (card.dataset.search||'').toLowerCase();
-      card.style.display = text.includes(q) ? '' : 'none';
-    });
-  };
-  input.addEventListener('input', debounce(run, 120));
-}
-
-/* ---- modal a11y: ESC to close, focus trap, restore focus ---- */
-let lastFocus = null;
-function trapFocus(modal){
-  const focusables = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-  if(!focusables.length) return ()=>{};
-  const first = focusables[0], last = focusables[focusables.length-1];
-  function handler(e){
-    if(e.key === 'Tab'){
-      if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
-      else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
-    }
-    if(e.key === 'Escape'){ closeAnyModal(); }
-  }
-  modal.addEventListener('keydown', handler);
-  return ()=> modal.removeEventListener('keydown', handler);
-}
-let untrap = ()=>{};
-function openModal(el){
-  lastFocus = document.activeElement;
-  document.body.classList.add('modal-open');
-  el.style.display = 'flex';
-  untrap = trapFocus(el);
-  (el.querySelector('[autofocus]') || el.querySelector('button') || el).focus();
-}
-function closeModal(el){
-  el.style.display = 'none';
-  document.body.classList.remove('modal-open');
-  untrap(); untrap = ()=>{};
-  if(lastFocus) lastFocus.focus();
-}
-function closeAnyModal(){
-  ['confirmModal','detailModal'].forEach(id=>{
-    const el = document.getElementById(id);
-    if(el && el.style.display === 'flex') closeModal(el);
-  });
-}
-
-/* swap in these implementations in your show/hide calls */
-function showConfirm(message){
-  document.getElementById('confirmMessage').textContent = message;
-  openModal(document.getElementById('confirmModal'));
-}
-function hideConfirm(){ closeModal(document.getElementById('confirmModal')); }
-function showDetails(html){
-  const m = document.getElementById('detailModal');
-  const body = document.getElementById('detailBody');
-  body.innerHTML = html;
-  // give the dialog a title for aria-labelledby
-  body.insertAdjacentHTML('afterbegin','<h3 id="detailTitle" tabindex="-1" autofocus></h3>');
-  openModal(m);
-}
-function hideDetails(){ closeModal(document.getElementById('detailModal')); }
-
-/* ESC close & outside click (already had outside; add ESC global) */
-window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeAnyModal(); });
-
-/* ---- cart badge hook (uses your .cart-count class) ---- */
-function updateCartCount(){
-  let badge = document.querySelector('.cart-count');
-  if(!badge){
-    const wrap = document.querySelector('.search-wrap') || document.querySelector('.brand');
-    if(!wrap) return;
-    const b = document.createElement('span'); b.className='cart-count'; wrap.style.position='relative'; wrap.appendChild(b);
-    badge = b;
-  }
-  badge.textContent = String(cart.length);
-  badge.style.display = cart.length ? 'flex' : 'none';
-}
-// call after addToCart
-function addToCart(name){
-  cart.push(name);
-  updateCartCount();
-  showConfirm(`${name} added to cart!`);
-}
 
 document.addEventListener('DOMContentLoaded', ()=>{
   renderFood();
@@ -379,7 +360,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
   initSearch();
   initReveal();
   initModals();
+  ensureCartBadge(); // create badge placeholder
 });
+
 
 
 
