@@ -1,4 +1,3 @@
-// script.js
 'use strict';
 
 /* =========================
@@ -62,29 +61,41 @@ const serviceProviders = [
 
 const cart = [];
 
-function el(tag, className, html){
+/**
+ * Create an element with optional class and innerHTML
+ * @param {string} tag 
+ * @param {string} [className] 
+ * @param {string} [html] 
+ * @returns {HTMLElement}
+ */
+const el = (tag, className, html) => {
   const e = document.createElement(tag);
-  if(className) e.className = className;
-  if(html !== undefined) e.innerHTML = html;
+  if (className) e.className = className;
+  if (html !== undefined) e.innerHTML = html;
   return e;
-}
+};
 
-function createCard({ title, lines = [], meta = [], actions = [] }){
+/**
+ * Create a card element with title, meta info, lines, and action buttons
+ * @param {object} param0 
+ * @returns {HTMLElement}
+ */
+function createCard({ title, lines = [], meta = [], actions = [] }) {
   const card = el('div', 'card');
   const h = el('h4', null, title);
   card.appendChild(h);
-  if(meta.length){
-    const metaRow = el('div','meta');
-    meta.forEach(m => metaRow.appendChild(el('span','badge', m)));
+  if (meta.length) {
+    const metaRow = el('div', 'meta');
+    meta.forEach(m => metaRow.appendChild(el('span', 'badge', m)));
     card.appendChild(metaRow);
   }
   lines.forEach(t => card.appendChild(el('p', null, t)));
-  if(actions.length){
-    const row = el('div','actions');
+  if (actions.length) {
+    const row = el('div', 'actions');
     actions.forEach(a => {
-      const b = el('button','btn');
+      const b = el('button', 'btn');
       b.classList.add(a.variant || 'btn-primary');
-      b.innerHTML = a.icon ? `<i class="${a.icon}"></i> ${a.label}` : a.label;
+      b.innerHTML = a.icon ? `<i class="${a.icon}" aria-hidden="true"></i> ${a.label}` : a.label;
       b.addEventListener('click', a.onClick);
       row.appendChild(b);
     });
@@ -93,89 +104,229 @@ function createCard({ title, lines = [], meta = [], actions = [] }){
   return card;
 }
 
-// Debounce (for search)
-function debounce(fn, delay=150){
-  let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args), delay); };
-}
+// Debounce function for search input
+const debounce = (fn, delay = 150) => {
+  let t;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), delay);
+  };
+};
 
 /* =========================
    Modal Management (a11y)
    ========================= */
 
 let lastFocus = null;
-let untrap = ()=>{};
+let untrap = () => {};
 
-function trapFocus(modal){
+/**
+ * Trap keyboard focus inside modal
+ * @param {HTMLElement} modal 
+ * @returns {Function} cleanup function
+ */
+function trapFocus(modal) {
   const focusables = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-  if(!focusables.length) return ()=>{};
-  const first = focusables[0], last = focusables[focusables.length-1];
-  function handler(e){
-    if(e.key === 'Tab'){
-      if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
-      else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+  if (!focusables.length) return () => { };
+  const first = focusables[0], last = focusables[focusables.length - 1];
+  function handler(e) {
+    if (e.key === 'Tab') {
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     }
-    if(e.key === 'Escape'){ closeAnyModal(); }
+    if (e.key === 'Escape') {
+      closeAnyModal();
+    }
   }
   modal.addEventListener('keydown', handler);
-  return ()=> modal.removeEventListener('keydown', handler);
+  return () => modal.removeEventListener('keydown', handler);
 }
 
-function openModal(el){
+/**
+ * Open modal and manage focus and aria attributes
+ * @param {HTMLElement} modal 
+ */
+function openModal(modal) {
+  if (!modal) return;
   lastFocus = document.activeElement;
   document.body.classList.add('modal-open');
-  el.style.display = 'flex';
-  untrap = trapFocus(el);
-  (el.querySelector('[autofocus]') || el.querySelector('button') || el).focus();
+  modal.style.display = 'flex';
+  modal.setAttribute('aria-hidden', 'false');
+  untrap = trapFocus(modal);
+  // Focus first autofocus element or first button or modal itself
+  const autofocusEl = modal.querySelector('[autofocus]');
+  if (autofocusEl) autofocusEl.focus();
+  else {
+    const firstBtn = modal.querySelector('button, [tabindex]:not([tabindex="-1"])');
+    if (firstBtn) firstBtn.focus();
+    else modal.focus();
+  }
 }
-function closeModal(el){
-  el.style.display = 'none';
+
+/**
+ * Close modal and restore focus and aria attributes
+ * @param {HTMLElement} modal 
+ */
+function closeModal(modal) {
+  if (!modal) return;
+  modal.style.display = 'none';
+  modal.setAttribute('aria-hidden', 'true');
   document.body.classList.remove('modal-open');
-  untrap(); untrap = ()=>{};
-  if(lastFocus) lastFocus.focus();
+  untrap();
+  untrap = () => { };
+  if (lastFocus) lastFocus.focus();
 }
-function closeAnyModal(){
-  ['confirmModal','detailModal'].forEach(id=>{
-    const el = document.getElementById(id);
-    if(el && el.style.display === 'flex') closeModal(el);
+
+/**
+ * Close any open modal
+ */
+function closeAnyModal() {
+  ['confirmModal', 'detailModal'].forEach(id => {
+    const modal = document.getElementById(id);
+    if (modal && modal.style.display === 'flex') closeModal(modal);
   });
 }
 
-// Public wrappers
-function showConfirm(message){
-  document.getElementById('confirmMessage').textContent = message;
-  openModal(document.getElementById('confirmModal'));
-}
-function hideConfirm(){ closeModal(document.getElementById('confirmModal')); }
-function showDetailsHTML(html){
-  const m = document.getElementById('detailModal');
-  const body = document.getElementById('detailBody');
-  body.innerHTML = `<h3 id="detailTitle" tabindex="-1" autofocus></h3>${html}`;
-  openModal(m);
-}
-function hideDetails(){ closeModal(document.getElementById('detailModal')); }
+/* =========================
+   Public Modal APIs
+   ========================= */
 
-// Global ESC and backdrop click
-window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeAnyModal(); });
-window.addEventListener('click', (e)=>{
-  if(e.target === document.getElementById('confirmModal')) hideConfirm();
-  if(e.target === document.getElementById('detailModal')) hideDetails();
+/**
+ * Show confirmation modal with message
+ * @param {string} message 
+ */
+function showConfirm(message) {
+  const modal = document.getElementById('confirmModal');
+  if (!modal) return;
+  const msgEl = document.getElementById('confirmMessage');
+  if (msgEl) msgEl.textContent = message;
+  openModal(modal);
+}
+
+/**
+ * Hide confirmation modal
+ */
+function hideConfirm() {
+  closeModal(document.getElementById('confirmModal'));
+}
+
+/**
+ * Show detail modal with HTML content and optional title
+ * @param {string} html 
+ * @param {string} [title] 
+ */
+function showDetailsHTML(html, title = 'Details') {
+  const modal = document.getElementById('detailModal');
+  const body = document.getElementById('detailBody');
+  if (!modal || !body) return;
+  // Clear previous content
+  body.innerHTML = '';
+  // Create heading with title
+  const heading = el('h3', null, title);
+  heading.id = 'detailTitle';
+  heading.tabIndex = -1;
+  body.appendChild(heading);
+  // Insert content
+  const content = el('div');
+  content.innerHTML = html;
+  body.appendChild(content);
+
+  // Attach event listeners for buttons inside modal content
+  // Use event delegation
+  body.querySelectorAll('button').forEach(btn => {
+    if (btn.id === 'detailBook') {
+      btn.onclick = () => {
+        hideDetails();
+        simulateFlow('Vet Service Request');
+      };
+    } else if (btn.id === 'frHelp') {
+      btn.onclick = () => {
+        hideDetails();
+        simulateFlow('Farmer Help Offer');
+      };
+    }
+  });
+
+  openModal(modal);
+}
+
+/**
+ * Hide detail modal
+ */
+function hideDetails() {
+  closeModal(document.getElementById('detailModal'));
+}
+
+/* =========================
+   Global Event Listeners
+   ========================= */
+
+window.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeAnyModal();
+});
+
+window.addEventListener('click', e => {
+  if (e.target === document.getElementById('confirmModal')) hideConfirm();
+  if (e.target === document.getElementById('detailModal')) hideDetails();
 });
 
 /* =========================
-   Actions
+   Cart Management
    ========================= */
 
-function simulateFlow(name){
-  showConfirm(`Order Confirmed! ${name} notified. Delivery on the way 🚴`);
-  setTimeout(()=>alert(`Vendor accepted the ${name} request!`), 1500);
-  setTimeout(()=>alert(`Delivery agent picked up your ${name}. Approaching soon 🚴`), 3500);
+/**
+ * Add item to cart or increase quantity if exists
+ * @param {string} name 
+ */
+function addToCart(name) {
+  if (!name) return;
+  const existing = cart.find(item => item.name === name);
+  if (existing) {
+    existing.quantity++;
+  } else {
+    cart.push({ name, quantity: 1 });
+  }
+  updateCartCount();
+  showConfirm(`${name} added to cart!`);
 }
 
-function ensureCartBadge(){
+/**
+ * Remove item from cart by name
+ * @param {string} name 
+ */
+function removeFromCart(name) {
+  const index = cart.findIndex(item => item.name === name);
+  if (index !== -1) {
+    cart.splice(index, 1);
+    updateCartCount();
+  }
+}
+
+/**
+ * Update cart count badge
+ */
+function updateCartCount() {
+  const badge = ensureCartBadge();
+  if (!badge) return;
+  const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  badge.textContent = String(totalCount);
+  badge.style.display = totalCount ? 'flex' : 'none';
+}
+
+/**
+ * Ensure cart badge exists in DOM
+ * @returns {HTMLElement|null}
+ */
+function ensureCartBadge() {
   let badge = document.querySelector('.cart-count');
-  if(!badge){
+  if (!badge) {
     const wrap = document.querySelector('.search-wrap');
-    if(!wrap) return;
+    if (!wrap) return null;
     badge = document.createElement('span');
     badge.className = 'cart-count';
     badge.textContent = '0';
@@ -184,46 +335,51 @@ function ensureCartBadge(){
   return badge;
 }
 
-function updateCartCount(){
-  const badge = ensureCartBadge();
-  if(!badge) return;
-  badge.textContent = String(cart.length);
-  badge.style.display = cart.length ? 'flex' : 'none';
-}
+/* =========================
+   Simulated Order Flow
+   ========================= */
 
-function addToCart(name){
-  cart.push(name);
-  updateCartCount();
-  showConfirm(`${name} added to cart!`);
+/**
+ * Simulate order flow with confirmation and alerts
+ * @param {string} name 
+ */
+function simulateFlow(name) {
+  showConfirm(`Order Confirmed! ${name} notified. Delivery on the way 🚴`);
+  setTimeout(() => alert(`Vendor accepted the ${name} request!`), 1500);
+  setTimeout(() => alert(`Delivery agent picked up your ${name}. Approaching soon 🚴`), 3500);
 }
 
 /* =========================
    Renderers
    ========================= */
 
-function renderFood(){
+function renderFood() {
   const wrap = document.getElementById('foodList');
-  foodVendors.forEach(v=>{
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  foodVendors.forEach(v => {
     const c = createCard({
       title: v.name,
       meta: [`⭐ ${v.rating}`, v.time],
       lines: [v.cuisine],
-      actions: [{ label:'Order Now', icon:'fa fa-motorcycle', onClick:()=>simulateFlow(v.name) }]
+      actions: [{ label: 'Order Now', icon: 'fa fa-motorcycle', onClick: () => simulateFlow(v.name) }]
     });
     c.dataset.search = `${v.name} ${v.cuisine}`.toLowerCase();
     wrap.appendChild(c);
   });
 }
 
-function renderKirana(){
+function renderKirana() {
   const wrap = document.getElementById('kiranaList');
-  kiranaItems.forEach(it=>{
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  kiranaItems.forEach(it => {
     const c = createCard({
       title: it.name,
       lines: [it.price],
       actions: [
-        { label:'Add to Cart', icon:'fa fa-cart-plus', variant:'btn-ghost', onClick:()=>addToCart(it.name) },
-        { label:'Order Now', icon:'fa fa-bolt', onClick:()=>simulateFlow(it.name) }
+        { label: 'Add to Cart', icon: 'fa fa-cart-plus', variant: 'btn-ghost', onClick: () => addToCart(it.name) },
+        { label: 'Order Now', icon: 'fa fa-bolt', onClick: () => simulateFlow(it.name) }
       ]
     });
     c.dataset.search = `${it.name} ${it.price}`.toLowerCase();
@@ -231,81 +387,87 @@ function renderKirana(){
   });
 }
 
-function renderVets(){
+function renderVets() {
   const provWrap = document.getElementById('vetProviders');
-  vetProviders.forEach(v=>{
+  if (!provWrap) return;
+  provWrap.innerHTML = '';
+  vetProviders.forEach(v => {
     const c = createCard({
       title: v.name,
       lines: [`${v.specialty} • ${v.location}`, `Consultation Fee: ${v.fee}`],
-      actions: [{ label:'Book Now', icon:'fa fa-calendar-check', onClick:()=>simulateFlow(v.name) }]
+      actions: [{ label: 'Book Now', icon: 'fa fa-calendar-check', onClick: () => simulateFlow(v.name) }]
     });
     c.dataset.search = `${v.name} ${v.specialty} ${v.location}`.toLowerCase();
     provWrap.appendChild(c);
   });
 
   const seekWrap = document.getElementById('vetSeekers');
-  vetSeekers.forEach(r=>{
+  if (!seekWrap) return;
+  seekWrap.innerHTML = '';
+  vetSeekers.forEach(r => {
     const c = createCard({
       title: r.animal,
       lines: [`Service: ${r.service}`, `Location: ${r.location}`],
-      actions: [{ label:'View Details', icon:'fa fa-eye', variant:'btn-ghost', onClick:()=>{
-        showDetailsHTML(`
-          <p><strong>Service Needed:</strong> ${r.service}</p>
-          <p><strong>Location:</strong> ${r.location}</p>
-          <button class="btn btn-primary" id="detailBook">Notify Vet</button>
-        `);
-        setTimeout(()=>{
-          const btn = document.getElementById('detailBook');
-          if(btn) btn.onclick = ()=>{ hideDetails(); simulateFlow(`${r.animal} ${r.service}`); };
-        },0);
-      }}]
+      actions: [{
+        label: 'View Details', icon: 'fa fa-eye', variant: 'btn-ghost', onClick: () => {
+          showDetailsHTML(`
+            <p><strong>Service Needed:</strong> ${r.service}</p>
+            <p><strong>Location:</strong> ${r.location}</p>
+            <button class="btn btn-primary" id="detailBook">Notify Vet</button>
+          `, `${r.animal} Service Request`);
+        }
+      }]
     });
     c.dataset.search = `${r.animal} ${r.service} ${r.location}`.toLowerCase();
     seekWrap.appendChild(c);
   });
 }
 
-function renderFarmers(){
+function renderFarmers() {
   const agriWrap = document.getElementById('agriServices');
-  agriServices.forEach(a=>{
+  if (!agriWrap) return;
+  agriWrap.innerHTML = '';
+  agriServices.forEach(a => {
     const c = createCard({
       title: a.name,
       lines: [`${a.type} • ${a.location}`],
-      actions: [{ label:'Contact Now', icon:'fa fa-phone', onClick:()=>simulateFlow(a.name) }]
+      actions: [{ label: 'Contact Now', icon: 'fa fa-phone', onClick: () => simulateFlow(a.name) }]
     });
     c.dataset.search = `${a.name} ${a.type} ${a.location}`.toLowerCase();
     agriWrap.appendChild(c);
   });
 
   const reqWrap = document.getElementById('farmerRequests');
-  farmerRequests.forEach(fr=>{
+  if (!reqWrap) return;
+  reqWrap.innerHTML = '';
+  farmerRequests.forEach(fr => {
     const c = createCard({
       title: fr.crop,
       lines: [`Need: ${fr.need}`, `Location: ${fr.location}`],
-      actions: [{ label:'View Details', icon:'fa fa-eye', variant:'btn-ghost', onClick:()=>{
-        showDetailsHTML(`
-          <p><strong>Need:</strong> ${fr.need}</p>
-          <p><strong>Location:</strong> ${fr.location}</p>
-          <button class="btn btn-primary" id="frHelp">Offer Help</button>
-        `);
-        setTimeout(()=>{
-          const btn = document.getElementById('frHelp');
-          if(btn) btn.onclick = ()=>{ hideDetails(); simulateFlow(`${fr.crop} ${fr.need}`); };
-        },0);
-      }}]
+      actions: [{
+        label: 'View Details', icon: 'fa fa-eye', variant: 'btn-ghost', onClick: () => {
+          showDetailsHTML(`
+            <p><strong>Need:</strong> ${fr.need}</p>
+            <p><strong>Location:</strong> ${fr.location}</p>
+            <button class="btn btn-primary" id="frHelp">Offer Help</button>
+          `, `${fr.crop} Request`);
+        }
+      }]
     });
     c.dataset.search = `${fr.crop} ${fr.need} ${fr.location}`.toLowerCase();
     reqWrap.appendChild(c);
   });
 }
 
-function renderServices(){
+function renderServices() {
   const wrap = document.getElementById('serviceList');
-  serviceProviders.forEach(s=>{
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  serviceProviders.forEach(s => {
     const c = createCard({
       title: s.name,
       lines: [`${s.type} • ${s.location}`],
-      actions: [{ label:'Book Now', icon:'fa fa-wrench', onClick:()=>simulateFlow(s.name) }]
+      actions: [{ label: 'Book Now', icon: 'fa fa-wrench', onClick: () => simulateFlow(s.name) }]
     });
     c.dataset.search = `${s.name} ${s.type} ${s.location}`.toLowerCase();
     wrap.appendChild(c);
@@ -316,52 +478,35 @@ function renderServices(){
    Search + Reveal + Events
    ========================= */
 
-function initSearch(){
-  const input = document.getElementById('globalSearch') || document.getElementById('searchInput');
-  if(!input) return;
-  const run = ()=>{
+/**
+ * Initialize search input filtering
+ */
+function initSearch() {
+  const input = document.getElementById('globalSearch');
+  if (!input) return;
+
+  // Prevent form submission if inside a form
+  if (input.form) {
+    input.form.addEventListener('submit', e => e.preventDefault());
+  }
+
+  const run = () => {
     const q = (input.value || '').trim().toLowerCase();
-    document.querySelectorAll('.grid .card').forEach(card=>{
-      const text = (card.dataset.search||'').toLowerCase();
+    document.querySelectorAll('.grid .card').forEach(card => {
+      const text = (card.dataset.search || '').toLowerCase();
       card.style.display = text.includes(q) ? '' : 'none';
     });
   };
-  input.addEventListener('input', debounce(run, 120));
+  input.addEventListener('input', debounce(run, 150));
 }
 
-function initReveal(){
-  const obs = new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{
-      if(e.isIntersecting){
-        e.target.classList.add('section-visible');
-        obs.unobserve(e.target);
-      }
-    });
-  }, { threshold: .2 });
-  document.querySelectorAll('.section').forEach(sec => obs.observe(sec));
-}
+/**
+ * Initialize section reveal on scroll
+ */
+function initReveal() {
+  if (!('IntersectionObserver' in window)) {
+    // Fallback: show all sections
 
-function initModals(){
-  document.getElementById('confirmClose').onclick = hideConfirm;
-  document.getElementById('confirmOk').onclick = hideConfirm;
-  document.getElementById('detailClose').onclick = hideDetails;
-}
-
-/* =========================
-   Init
-   ========================= */
-
-document.addEventListener('DOMContentLoaded', ()=>{
-  renderFood();
-  renderKirana();
-  renderVets();
-  renderFarmers();
-  renderServices();
-  initSearch();
-  initReveal();
-  initModals();
-  ensureCartBadge(); // create badge placeholder
-});
 
 
 
