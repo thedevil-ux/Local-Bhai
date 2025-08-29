@@ -61,13 +61,7 @@ const serviceProviders = [
 
 const cart = [];
 
-/**
- * Create an element with optional class and innerHTML
- * @param {string} tag 
- * @param {string} [className] 
- * @param {string} [html] 
- * @returns {HTMLElement}
- */
+/** Create element helper */
 const el = (tag, className, html) => {
   const e = document.createElement(tag);
   if (className) e.className = className;
@@ -75,11 +69,7 @@ const el = (tag, className, html) => {
   return e;
 };
 
-/**
- * Create a card element with title, meta info, lines, and action buttons
- * @param {object} param0 
- * @returns {HTMLElement}
- */
+/** Card factory */
 function createCard({ title, lines = [], meta = [], actions = [] }) {
   const card = el('div', 'card');
   const h = el('h4', null, title);
@@ -104,13 +94,9 @@ function createCard({ title, lines = [], meta = [], actions = [] }) {
   return card;
 }
 
-// Debounce function for search input
+/** debounce */
 const debounce = (fn, delay = 150) => {
-  let t;
-  return (...args) => {
-    clearTimeout(t);
-    t = setTimeout(() => fn(...args), delay);
-  };
+  let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); };
 };
 
 /* =========================
@@ -120,37 +106,21 @@ const debounce = (fn, delay = 150) => {
 let lastFocus = null;
 let untrap = () => {};
 
-/**
- * Trap keyboard focus inside modal
- * @param {HTMLElement} modal 
- * @returns {Function} cleanup function
- */
 function trapFocus(modal) {
   const focusables = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-  if (!focusables.length) return () => { };
+  if (!focusables.length) return () => {};
   const first = focusables[0], last = focusables[focusables.length - 1];
   function handler(e) {
     if (e.key === 'Tab') {
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     }
-    if (e.key === 'Escape') {
-      closeAnyModal();
-    }
+    if (e.key === 'Escape') closeAnyModal();
   }
   modal.addEventListener('keydown', handler);
   return () => modal.removeEventListener('keydown', handler);
 }
 
-/**
- * Open modal and manage focus and aria attributes
- * @param {HTMLElement} modal 
- */
 function openModal(modal) {
   if (!modal) return;
   lastFocus = document.activeElement;
@@ -158,170 +128,64 @@ function openModal(modal) {
   modal.style.display = 'flex';
   modal.setAttribute('aria-hidden', 'false');
   untrap = trapFocus(modal);
-  // Focus first autofocus element or first button or modal itself
   const autofocusEl = modal.querySelector('[autofocus]');
   if (autofocusEl) autofocusEl.focus();
-  else {
-    const firstBtn = modal.querySelector('button, [tabindex]:not([tabindex="-1"])');
-    if (firstBtn) firstBtn.focus();
-    else modal.focus();
-  }
+  else (modal.querySelector('button, [tabindex]:not([tabindex="-1"])') || modal).focus();
 }
 
-/**
- * Close modal and restore focus and aria attributes
- * @param {HTMLElement} modal 
- */
 function closeModal(modal) {
   if (!modal) return;
   modal.style.display = 'none';
   modal.setAttribute('aria-hidden', 'true');
   document.body.classList.remove('modal-open');
-  untrap();
-  untrap = () => { };
+  untrap(); untrap = () => {};
   if (lastFocus) lastFocus.focus();
 }
 
-/**
- * Close any open modal
- */
 function closeAnyModal() {
   ['confirmModal', 'detailModal'].forEach(id => {
-    const modal = document.getElementById(id);
-    if (modal && modal.style.display === 'flex') closeModal(modal);
+    const m = document.getElementById(id);
+    if (m && m.style.display === 'flex') closeModal(m);
   });
 }
 
-/* =========================
-   Public Modal APIs
-   ========================= */
-
-/**
- * Show confirmation modal with message
- * @param {string} message 
- */
+// Public wrappers
 function showConfirm(message) {
   const modal = document.getElementById('confirmModal');
-  if (!modal) return;
   const msgEl = document.getElementById('confirmMessage');
   if (msgEl) msgEl.textContent = message;
   openModal(modal);
 }
+function hideConfirm() { closeModal(document.getElementById('confirmModal')); }
 
-/**
- * Hide confirmation modal
- */
-function hideConfirm() {
-  closeModal(document.getElementById('confirmModal'));
-}
-
-/**
- * Show detail modal with HTML content and optional title
- * @param {string} html 
- * @param {string} [title] 
- */
 function showDetailsHTML(html, title = 'Details') {
   const modal = document.getElementById('detailModal');
   const body = document.getElementById('detailBody');
   if (!modal || !body) return;
-  // Clear previous content
   body.innerHTML = '';
-  // Create heading with title
-  const heading = el('h3', null, title);
-  heading.id = 'detailTitle';
-  heading.tabIndex = -1;
+  const heading = el('h3', null, title); heading.id = 'detailTitle'; heading.tabIndex = -1;
   body.appendChild(heading);
-  // Insert content
-  const content = el('div');
-  content.innerHTML = html;
-  body.appendChild(content);
-
-  // Attach event listeners for buttons inside modal content
-  // Use event delegation
+  const content = el('div'); content.innerHTML = html; body.appendChild(content);
+  // Delegate button actions
   body.querySelectorAll('button').forEach(btn => {
-    if (btn.id === 'detailBook') {
-      btn.onclick = () => {
-        hideDetails();
-        simulateFlow('Vet Service Request');
-      };
-    } else if (btn.id === 'frHelp') {
-      btn.onclick = () => {
-        hideDetails();
-        simulateFlow('Farmer Help Offer');
-      };
-    }
+    if (btn.id === 'detailBook') btn.onclick = () => { hideDetails(); simulateFlow('Vet Service Request'); };
+    if (btn.id === 'frHelp') btn.onclick = () => { hideDetails(); simulateFlow('Farmer Help Offer'); };
   });
-
   openModal(modal);
 }
+function hideDetails() { closeModal(document.getElementById('detailModal')); }
 
-/**
- * Hide detail modal
- */
-function hideDetails() {
-  closeModal(document.getElementById('detailModal'));
-}
-
-/* =========================
-   Global Event Listeners
-   ========================= */
-
-window.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeAnyModal();
-});
-
+// Global listeners (ESC + backdrop)
+window.addEventListener('keydown', e => { if (e.key === 'Escape') closeAnyModal(); });
 window.addEventListener('click', e => {
   if (e.target === document.getElementById('confirmModal')) hideConfirm();
   if (e.target === document.getElementById('detailModal')) hideDetails();
 });
 
 /* =========================
-   Cart Management
+   Cart
    ========================= */
 
-/**
- * Add item to cart or increase quantity if exists
- * @param {string} name 
- */
-function addToCart(name) {
-  if (!name) return;
-  const existing = cart.find(item => item.name === name);
-  if (existing) {
-    existing.quantity++;
-  } else {
-    cart.push({ name, quantity: 1 });
-  }
-  updateCartCount();
-  showConfirm(`${name} added to cart!`);
-}
-
-/**
- * Remove item from cart by name
- * @param {string} name 
- */
-function removeFromCart(name) {
-  const index = cart.findIndex(item => item.name === name);
-  if (index !== -1) {
-    cart.splice(index, 1);
-    updateCartCount();
-  }
-}
-
-/**
- * Update cart count badge
- */
-function updateCartCount() {
-  const badge = ensureCartBadge();
-  if (!badge) return;
-  const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-  badge.textContent = String(totalCount);
-  badge.style.display = totalCount ? 'flex' : 'none';
-}
-
-/**
- * Ensure cart badge exists in DOM
- * @returns {HTMLElement|null}
- */
 function ensureCartBadge() {
   let badge = document.querySelector('.cart-count');
   if (!badge) {
@@ -334,15 +198,24 @@ function ensureCartBadge() {
   }
   return badge;
 }
+function updateCartCount() {
+  const badge = ensureCartBadge();
+  if (!badge) return;
+  const total = cart.reduce((s, it) => s + it.quantity, 0);
+  badge.textContent = String(total);
+  badge.style.display = total ? 'flex' : 'none';
+}
+function addToCart(name) {
+  const existing = cart.find(i => i.name === name);
+  if (existing) existing.quantity++; else cart.push({ name, quantity: 1 });
+  updateCartCount();
+  showConfirm(`${name} added to cart!`);
+}
 
 /* =========================
    Simulated Order Flow
    ========================= */
 
-/**
- * Simulate order flow with confirmation and alerts
- * @param {string} name 
- */
 function simulateFlow(name) {
   showConfirm(`Order Confirmed! ${name} notified. Delivery on the way 🚴`);
   setTimeout(() => alert(`Vendor accepted the ${name} request!`), 1500);
@@ -354,8 +227,7 @@ function simulateFlow(name) {
    ========================= */
 
 function renderFood() {
-  const wrap = document.getElementById('foodList');
-  if (!wrap) return;
+  const wrap = document.getElementById('foodList'); if (!wrap) return;
   wrap.innerHTML = '';
   foodVendors.forEach(v => {
     const c = createCard({
@@ -370,8 +242,7 @@ function renderFood() {
 }
 
 function renderKirana() {
-  const wrap = document.getElementById('kiranaList');
-  if (!wrap) return;
+  const wrap = document.getElementById('kiranaList'); if (!wrap) return;
   wrap.innerHTML = '';
   kiranaItems.forEach(it => {
     const c = createCard({
@@ -388,8 +259,7 @@ function renderKirana() {
 }
 
 function renderVets() {
-  const provWrap = document.getElementById('vetProviders');
-  if (!provWrap) return;
+  const provWrap = document.getElementById('vetProviders'); if (!provWrap) return;
   provWrap.innerHTML = '';
   vetProviders.forEach(v => {
     const c = createCard({
@@ -401,8 +271,7 @@ function renderVets() {
     provWrap.appendChild(c);
   });
 
-  const seekWrap = document.getElementById('vetSeekers');
-  if (!seekWrap) return;
+  const seekWrap = document.getElementById('vetSeekers'); if (!seekWrap) return;
   seekWrap.innerHTML = '';
   vetSeekers.forEach(r => {
     const c = createCard({
@@ -424,8 +293,7 @@ function renderVets() {
 }
 
 function renderFarmers() {
-  const agriWrap = document.getElementById('agriServices');
-  if (!agriWrap) return;
+  const agriWrap = document.getElementById('agriServices'); if (!agriWrap) return;
   agriWrap.innerHTML = '';
   agriServices.forEach(a => {
     const c = createCard({
@@ -437,8 +305,7 @@ function renderFarmers() {
     agriWrap.appendChild(c);
   });
 
-  const reqWrap = document.getElementById('farmerRequests');
-  if (!reqWrap) return;
+  const reqWrap = document.getElementById('farmerRequests'); if (!reqWrap) return;
   reqWrap.innerHTML = '';
   farmerRequests.forEach(fr => {
     const c = createCard({
@@ -460,8 +327,7 @@ function renderFarmers() {
 }
 
 function renderServices() {
-  const wrap = document.getElementById('serviceList');
-  if (!wrap) return;
+  const wrap = document.getElementById('serviceList'); if (!wrap) return;
   wrap.innerHTML = '';
   serviceProviders.forEach(s => {
     const c = createCard({
@@ -475,21 +341,13 @@ function renderServices() {
 }
 
 /* =========================
-   Search + Reveal + Events
+   Search + Reveal + Init
    ========================= */
 
-/**
- * Initialize search input filtering
- */
 function initSearch() {
   const input = document.getElementById('globalSearch');
   if (!input) return;
-
-  // Prevent form submission if inside a form
-  if (input.form) {
-    input.form.addEventListener('submit', e => e.preventDefault());
-  }
-
+  if (input.form) input.form.addEventListener('submit', e => e.preventDefault());
   const run = () => {
     const q = (input.value || '').trim().toLowerCase();
     document.querySelectorAll('.grid .card').forEach(card => {
@@ -500,12 +358,43 @@ function initSearch() {
   input.addEventListener('input', debounce(run, 150));
 }
 
-/**
- * Initialize section reveal on scroll
- */
 function initReveal() {
+  const sections = document.querySelectorAll('.section');
   if (!('IntersectionObserver' in window)) {
-    // Fallback: show all sections
+    sections.forEach(s => s.classList.add('section-visible'));
+    return;
+  }
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('section-visible');
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.2 });
+  sections.forEach(sec => obs.observe(sec));
+}
+
+function initModals() {
+  const cc = document.getElementById('confirmClose');
+  const co = document.getElementById('confirmOk');
+  const dc = document.getElementById('detailClose');
+  if (cc) cc.onclick = hideConfirm;
+  if (co) co.onclick = hideConfirm;
+  if (dc) dc.onclick = hideDetails;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderFood();
+  renderKirana();
+  renderVets();
+  renderFarmers();
+  renderServices();
+  initSearch();
+  initReveal();
+  initModals();
+  ensureCartBadge(); // prepare cart badge
+});
 
 
 
