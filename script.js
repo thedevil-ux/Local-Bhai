@@ -1,3 +1,4 @@
+// script.js
 'use strict';
 
 /* =========================
@@ -506,6 +507,7 @@ function initSearch() {
 function initReveal() {
   if (!('IntersectionObserver' in window)) {
     // Fallback: show all sections
+
 
 
 
