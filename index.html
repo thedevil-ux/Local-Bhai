@@ -6,20 +6,50 @@
   <title>LocalBhai — Apka Seher Ka Bhai</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="LocalBhai — Your neighbourhood platform for food delivery, kirana essentials, vet services, agriculture support and general services in Odisha." />
+
+  <link rel="canonical" href="https://thedevil-ux.github.io/Local-Bhai/">
+  <meta name="robots" content="index,follow">
+
+  <!-- Open Graph / Twitter -->
+  <meta property="og:title" content="LocalBhai — Apka Seher Ka Bhai" />
+  <meta property="og:description" content="Hyperlocal orders & services: food, kirana, vets, farmers, electricians, plumbers and more." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://thedevil-ux.github.io/Local-Bhai/" />
+  <meta property="og:image" content="https://thedevil-ux.github.io/Local-Bhai/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- Local Business JSON-LD (demo) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "LocalBhai",
+    "description": "Hyperlocal orders & services in Odisha",
+    "areaServed": "Bhubaneswar, Cuttack",
+    "url": "https://thedevil-ux.github.io/Local-Bhai/",
+    "sameAs": [],
+    "image": "https://thedevil-ux.github.io/Local-Bhai/og-image.png"
+  }
+  </script>
+
   <!-- Preconnect for faster font loading -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet" />
   <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-..." referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" referrerpolicy="no-referrer" />
   <!-- Main Stylesheet -->
   <link rel="stylesheet" href="style.css" />
   <!-- Theme colour & favicon -->
   <meta name="theme-color" content="#e1bee7" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='80'%3E%F0%9F%8F%A0%3C/text%3E%3C/svg%3E" />
+  <!-- PWA manifest -->
+  <link rel="manifest" href="manifest.webmanifest">
 </head>
 <body>
+
+  <a href="#hero" class="sr-only">Skip to main content</a>
 
   <!-- Navbar -->
   <header id="navbar" role="banner">
@@ -28,6 +58,7 @@
         <span class="brand-logo" aria-hidden="true">🏠</span>
         <span class="brand-name">LocalBhai</span>
       </div>
+      <button id="langToggle" class="btn btn-ghost" style="padding:.35rem .7rem">EN/ଓ</button>
       <nav class="nav-links" aria-label="Primary navigation">
         <a href="#hero">Home</a>
         <a href="#food">Food</a>
@@ -35,6 +66,9 @@
         <a href="#vet">Vet</a>
         <a href="#farmers">Farmers</a>
         <a href="#services">Services</a>
+        <a href="#howItWorks">How it Works</a>
+        <a href="#faq">FAQ</a>
+        <a href="#testimonials">Testimonials</a>
       </nav>
       <form class="search-wrap" role="search" aria-label="Site search" onsubmit="return false;">
         <label for="globalSearch" class="sr-only">Search restaurants, kirana, vets, services</label>
@@ -120,7 +154,107 @@
       </div>
       <div id="serviceList" class="grid" aria-live="polite" aria-relevant="additions"></div>
     </section>
+
+    <!-- How it Works Section -->
+    <section id="howItWorks" class="section" aria-labelledby="howItWorksHeading">
+      <div class="section-head">
+        <h2 id="howItWorksHeading"><i class="fa fa-gear" aria-hidden="true"></i> How it Works</h2>
+        <p>A simple journey for first-time users</p>
+      </div>
+      <ol class="how-it-works-list">
+        <li><strong>Browse:</strong> Explore local food, kirana, vet, agri, and service providers near you.</li>
+        <li><strong>Select:</strong> Choose your desired items or services and add them to your cart.</li>
+        <li><strong>Order:</strong> Place your order with secure payment options.</li>
+        <li><strong>Track:</strong> Get real-time updates on your order and delivery status.</li>
+        <li><strong>Enjoy:</strong> Receive your order and enjoy hassle-free local services!</li>
+      </ol>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="section" aria-labelledby="faqHeading">
+      <div class="section-head">
+        <h2 id="faqHeading"><i class="fa fa-question-circle" aria-hidden="true"></i> Frequently Asked Questions</h2>
+      </div>
+      <dl class="faq-list">
+        <dt>How do I place an order?</dt>
+        <dd>Browse the categories, select your items or services, and click the order button. Follow the checkout process to complete your order.</dd>
+
+        <dt>What payment methods are accepted?</dt>
+        <dd>We accept all major credit/debit cards, UPI, and cash on delivery where applicable.</dd>
+
+        <dt>Can I track my delivery?</dt>
+        <dd>Yes, once your order is confirmed, you will receive real-time updates on the delivery status.</dd>
+
+        <dt>What if I have an issue with my order?</dt>
+        <dd>Contact our 24×7 support team via phone or chat, and we will assist you promptly.</dd>
+      </dl>
+    </section>
+
+    <!-- Trust Badges Section -->
+    <section id="trustBadges" class="section" aria-label="Trust badges">
+      <div class="trust-badges-container">
+        <div class="trust-badge" aria-label="Verified providers">
+          <i class="fa fa-check-circle" aria-hidden="true" style="color:green;"></i>
+          <span>Verified providers ✅</span>
+        </div>
+        <div class="trust-badge" aria-label="Refund Promise">
+          <i class="fa fa-money-bill-wave" aria-hidden="true" style="color:#f39c12;"></i>
+          <span>Refund Promise 💸</span>
+        </div>
+        <div class="trust-badge" aria-label="24 by 7 Support">
+          <i class="fa fa-headset" aria-hidden="true" style="color:#3498db;"></i>
+          <span>24×7 Support 📞</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="section" aria-labelledby="testimonialsHeading">
+      <div class="section-head">
+        <h2 id="testimonialsHeading"><i class="fa fa-star" aria-hidden="true"></i> What Our Customers Say</h2>
+      </div>
+      <div class="testimonials-list">
+        <blockquote class="testimonial">
+          <p>“LocalBhai made ordering food so easy and fast. Highly recommend!”</p>
+          <footer>— Priya S. <span aria-label="5 star rating" role="img">⭐️⭐️⭐️⭐️⭐️</span></footer>
+        </blockquote>
+        <blockquote class="testimonial">
+          <p>“The vet services helped me find a trusted doctor for my pet quickly.”</p>
+          <footer>— Ramesh K. <span aria-label="4 star rating" role="img">⭐️⭐️⭐️⭐️☆</span></footer>
+        </blockquote>
+        <blockquote class="testimonial">
+          <p>“Great platform for local services. The refund promise gave me peace of mind.”</p>
+          <footer>— Anjali M. <span aria-label="5 star rating" role="img">⭐️⭐️⭐️⭐️⭐️</span></footer>
+        </blockquote>
+      </div>
+    </section>
+
+    <!-- Signup Section (for CTA) -->
+    <section id="signup" class="section" aria-labelledby="signupHeading">
+      <div class="section-head">
+        <h2 id="signupHeading"><i class="fa fa-rocket" aria-hidden="true"></i> Join the Pilot</h2>
+        <p>Be the first to try LocalBhai in Bhubaneswar</p>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <h4>Users</h4>
+          <p>Get priority access and launch offers.</p>
+          <a class="btn btn-primary" href="https://forms.gle/your-google-form" target="_blank" rel="noopener">Sign Up</a>
+        </div>
+        <div class="card">
+          <h4>Vendors</h4>
+          <p>List your services and get customers from day one.</p>
+          <a class="btn btn-ghost" href="https://forms.gle/your-vendor-form" target="_blank" rel="noopener">Partner with Us</a>
+        </div>
+      </div>
+    </section>
+
   </main>
+
+  <!-- CTA Stripe -->
+  <aside id="ctaStripe" class="cta-stripe" role="region" aria-label="Launching soon call to action">
+    <p>🚀 Launching soon in Bhubaneswar • <a href="#signup" class="cta-link">Join Pilot</a></p>
+  </aside>
 
   <!-- Footer -->
   <footer role="contentinfo">
@@ -149,8 +283,15 @@
 
   <!-- Main Script -->
   <script src="script.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(console.error);
+    }
+  </script>
 </body>
 </html>
+
+
 
 
 
