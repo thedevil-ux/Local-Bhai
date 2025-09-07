@@ -3,7 +3,7 @@
 ## Hyperlocal Services & Community Platform for Odisha
 
 ![LocalBhai Hero Image](file:///C:/Users/USER/Desktop/Screenshot%20(221).png)
-*(Replace with a compelling screenshot or GIF of your platform in action)*
+*(Replace with a compelling screenshot or GIF of my platform in action)*
 
 ---
 
@@ -91,7 +91,7 @@ We welcome contributions! If you'd like to contribute, please follow these steps
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. *(You'll need to create a LICENSE file in your repo if you don't have one)*
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. *(I need to create a LICENSE file in your repo since I don't have one)*
 
 ## 📞 Contact
 
