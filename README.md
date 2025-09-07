@@ -2,7 +2,7 @@
 
 ## Hyperlocal Services & Community Platform for Odisha
 
-![LocalBhai Hero Image](https://thedevil-ux.github.io/Local-Bhai/og-image.png)
+![LocalBhai Hero Image](file:///C:/Users/USER/Desktop/Screenshot%20(221).png)
 *(Replace with a compelling screenshot or GIF of your platform in action)*
 
 ---
@@ -96,7 +96,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Contact
 
 For inquiries, partnerships, or support, please contact:
-*   **Email:** your.email@example.com
+*   **Email:** ayusmanmohapatra12@gmail.com
 *   **LinkedIn:** [Your LinkedIn Profile](https://www.linkedin.com/in/yourprofile/)
 *   **Website:** [https://thedevil-ux.github.io/Local-Bhai/](https://thedevil-ux.github.io/Local-Bhai/)
 
