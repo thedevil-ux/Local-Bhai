@@ -176,7 +176,10 @@ function closeAnyModal() {
 function showConfirm(message) {
   const modal = document.getElementById('confirmModal');
   const msgEl = document.getElementById('confirmMessage');
-  if (msgEl) msgEl.textContent = message;
+  if (msgEl) {
+    msgEl.setAttribute('aria-live', 'polite');
+    msgEl.textContent = message;
+  }
   openModal(modal);
 }
 function hideConfirm() { closeModal(document.getElementById('confirmModal')); }
@@ -192,7 +195,7 @@ function showDetailsHTML(html, title = 'Details') {
   const content = el('div');
   content.innerHTML = html;
   body.appendChild(content);
-  // button IDs replaced in generic simulation; hooking
+  // Hook buttons inside details modal
   body.querySelectorAll('button').forEach(btn => {
     if (btn.id === 'detailBook') {
       btn.onclick = () => { hideDetails(); simulateFlow('Vet Service Request'); };
@@ -444,6 +447,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initModals();
   ensureCartBadge(); // prepare cart badge
 });
+
 
 
 
